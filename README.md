@@ -1,2 +1,2 @@
 # 2022-23_BF_dataanalysis
-This repository created for data analysis of the project of beyond fear.  The repository composes the script  of data preprocessing for behavior and eye-tracking data, the script of  mixed-effect modeling, and the script of moderate  analysis  
+This repository has been created for the data analysis of the Beyond Fear project. It includes scripts for data preprocessing of both behavior and eye-tracking data, mixed-effect modeling, and moderation analysis.
