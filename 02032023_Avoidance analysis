@@ -119,6 +119,10 @@ end
 %positive even number, it indicates the presence of switching in the trial.
 
 
+% we identify the avoidance by finding if a room contains 'ROOM 1' and ROOM 2'
+%  sum(contains(room,a20),"all")>1  = if a trial return two logic 1, then the participants avoid in this trial. 
+%  contains(room,a20) = find values in room has find in a20 
+
 
 % ------------ parameters ---------------
 
