@@ -182,25 +182,32 @@ for  iii = 1: size(sn)
         a13.Avoidindex(r,1) = a12;
         adp2.(strcat('BF',num2str(iii))) = a13;
     end
-    ev = 0;
-    for ii = 1:size(tn,1)
-        ev = ev+1;
-        a8 = sum([a13{[a13{:,"TRIAL"}]'== ii, "Avoidindex"}]');
+               for ii = 1:size(tn,1)
+                   a20 = [a13{[a13{:,"TRIAL"}]'== ii,'ROOM'}];                 
+                   a21(ii,iii)  = sum(contains(room,a20),"all")>1;
+           end
+           advi = a21(:)
+       end 
+   end 
+  % ev = 0;
+    %for ii = 1:size(tn,1)
+       % ev = ev+1;
+       % a8 = sum([a13{[a13{:,"TRIAL"}]'== ii, "Avoidindex"}]');
        
-        a10(ev,iii) = sum([a13{[a13{:,"TRIAL"}]'== ii, "Avoidindex"}]');
+       % a10(ev,iii) = sum([a13{[a13{:,"TRIAL"}]'== ii, "Avoidindex"}]');
         
-        if a8 > - 15 & a8 < 5  
+       % if a8 > - 15 & a8 < 5  
             avdi(ev,iii) = 1;
         
-        elseif a8 == -16
+        % elseif a8 == -16
 
-            avdi(ev,iii) = 1;
-        else 
-            avdi(ev,iii) = 0;
-        end
-    end
+           % avdi(ev,iii) = 1;
+       % else 
+          %  avdi(ev,iii) = 0;
+        %end
+   % end
 
-    clear a13 
+   % clear a13 
 end
 
 %%
