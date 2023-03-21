@@ -1,0 +1,341 @@
+
+clear all
+clc
+
+tic
+
+%% data preprocessing for one subject
+
+% ------- note -------
+% This script aims to build an structure includes personal traits,
+% data for manipulation checking and data for main data analysis for each
+% participants
+
+% data structure (take the first participant as an example)
+
+% sub1.cspositive_location = 'stretching'
+
+% sub1.personaltriats.
+
+% sub1.Pavolovn_fixation.firstfixation & totalfixation_csnegative & totalfixation_cspositive
+
+% sub1.avoidance_fixation. firstfixationroom1  & firstfixationroom2 &
+% totalfirxationroom1 & total fixationroom2
+
+% sub1.mainanalysis_behavior.avoidance
+
+%%% Please read the 'readme' file for instructions on how to execute the script for each step.
+
+
+%% --------- Step 1: read data and unify the name of AOIs for further analysis  ------------
+
+% Aim: Assigns the path to the directory containing the data to a
+% variable named 'bfp'
+bfp = 'BF_DATA';
+
+% Obtain a list of files in the
+% directory whose filenames start with 'BeyondFear_1', and assigns the
+% resulting structure array to a variable named 'avo', which save the data in a structure.
+avo = dir(fullfile('BF_DATA/BeyondFear_1*'));
+
+% obtain a list of files in the
+% directory whose filenames start with 'BeyondFear_EYE_', and assigns the
+% resulting structure array to a variable named 'eyd'.
+eyd = dir(fullfile('BF_DATA/BeyondFear_EYE_*'));
+
+% subject numbr
+
+sn = size(avo,1);
+
+ix = 3
+
+
+
+    % Uses the "fullfile" function to create a filename by combining the
+    % directory path "bfp" and the "name" field of avoid
+
+    filnam = fullfile(bfp,avo(ix).name);
+    fav = readtable(filnam);
+
+    % for further analysis, the data is save as cell
+    sub_avo = table2cell(fav);
+
+    % save eye-tracking data into cell
+    edname = fullfile(bfp,eyd(ix).name);
+    eyt = readtable(edname);
+    sub_eye = table2cell(eyt);
+
+
+
+% clear filnam edname bfp fav
+% clear  eyd eyt
+
+%% ---- Step 2: identify the movment associated with CS type --------
+% Aim: assign the cs type to the movemnets in a new array (couloum 12)
+
+% identify the cspositive used
+cspi = sub_avo{1,4};
+
+% extract movemnet data from coloun 9 which is contained three type of value
+% none, bending, stretching
+
+for i  = 1:size(sub_avo,1)
+    % if the value in coloum 9 is equal to 'none' 'none' is saved in coloum
+    % 12
+    if  strcmp(sub_avo(i,9),'none') == 1
+
+        sub_avo(i,12) = {['none']};
+        % if the value in coloum 9 is equal to the value saved in cspi, 'cs+' is saved in coloum
+        % 12
+    elseif strcmp(sub_avo(i,9),cspi) == 1
+
+        sub_avo(i,12) = {['cs+']};
+    else
+        % other value is saved in colloum 12 as 'cs-'
+        sub_avo(i,12) = {['cs-']};
+
+    end
+
+end
+
+
+%% --------- Step 3: split behavior data into phases -------------
+
+% ----- note ----
+% There is no avoidance tested in the manipulation phase,
+% thus, we only save behaviror data of phase 2 (avoidance phase) and phase
+% 3 (exploration phase)
+
+
+% ----- parameters  ----
+
+% Phase name
+pn = unique(sub_avo(:, 2));
+
+% Trial number
+tn = unique([sub_avo{:, 3}]');
+
+% full trial number 1:48
+
+fn = [1:48]';
+
+% if a participant doesn't finish 48 trials reported it and display the
+% missing trial and subject number
+
+if isequal(tn,fn) ~= 1
+    disp(i)
+    misstrial = fn(ismember(fn,tn)== 0)
+end
+
+
+
+% ----- split files  ----
+
+for i = 1: size(pn,1)
+
+    %filtered data: match the value in coloum2 ('phase') and variable "phase', only if the
+    %result is return to 1, save the rows into sub1_behavior_phase*
+    %seperately
+
+    sub1_behavior_phase2 = sub_avo(strcmp(sub_avo(:,2),pn{2}),:); % coloum 2 = 'phase'
+    sub1_behavior_phase3 = sub_avo(strcmp(sub_avo(:,2),pn{3}),:);
+
+end
+
+% clear fn avo
+
+%% ----------- Avoidance behavior  ---------------
+
+%  ------- parameter for behavior data ----------
+
+%%% < identify avoidance >
+
+% room type
+rm = {['Room 1'],['Room 2']};
+
+% identify type of rooms based on trials
+itr = {};
+
+% identify avoidance
+iav = [];
+
+
+%%% < identify CStype >
+
+% index step in the hall
+inv = ['none'];
+
+% cstype used in rooms
+cst = {};
+
+% index movmemnt used in the first room
+imov = {};
+
+% index number of room used in the first room
+iroomav = {};
+
+% index cs type
+ics = {['cs-'],['cs+']};
+
+% save all data in a structure of avoiance
+
+savoid = {};
+
+% phase number
+
+phase = {['phase1'];['phase2'];['phase3']};
+
+
+
+%% ---- Step 4: code avoidance/no-avoidance -----
+
+% four type of avoidance
+% cs+ ----> cs-
+% cs- ----> cs+
+
+
+% cs- ----> cs-
+% cs+ ----> cs+
+
+% ---- type 1 & 2 -----
+
+% We defined avoidance that If a subject switch rooms(avoid) from room
+% assicated with cs+ to cs- ,vice verse, there is two types of rooms.
+
+% To identify the avoidance, the strategy is that to identify types of
+% rooms contained in a trial.
+
+% if a trail contains each one of room, value will return to a logic number '1'. Then sum the logic
+% number, if the result >1, that indicates avoidance.
+
+for i = 1:size(tn,1)
+
+    itr = sub1_behavior_phase2([sub1_behavior_phase2{:,3}] == i,7); % coloum 3 = Trial, coloum 7 = ROOM
+    iavi = sum(contains(rm,itr),"all"); %%%%%% avoiance index %%%%%%%
+
+    if iavi == 1
+        iav(i,1) = 0;
+    else
+        iav(i,1) = 1;
+
+    end
+end
+
+% ---- conditions 3 & 4 ----
+
+% How do we define if a participants leave current room and enter into the same room
+
+
+% ---- identify CS type used in first room -------
+
+% Aim: extact the movement and the room number used in the first room
+% A trial in our VR environment involves at least 5 steps to complete the
+% task. And the typic avoidance and non-avoidance is recorded as following:
+
+
+%       Teleport        CStype
+%   'Start Trial'       'none'
+% 'Teleport_Room2_1'    'cs+'
+% 'Teleport_Room2_2'    'cs+'
+% 'Teleport_Room2_3'    'cs+'
+% 'Teleport_Room2_4'    'cs+'
+%    'placebook'        'cs+'
+
+%       Teleport        CStype
+%   'Start Trial'       'none'
+% 'Teleport_Room2_1'    'cs+'
+%   'Start Trial'       'none'
+% 'Teleport_Room1_1'    'cs-'
+% 'Teleport_Room1_2'    'cs-'
+% 'Teleport_Room1_3'    'cs-'
+% 'Teleport_Room1_4'    'cs-'
+%    'placebook'        'cs-'
+
+
+% To identify the cs type used in the first room, we employ the following
+% strategy:
+
+% 1. Check if the first value in the 'phase' column is equal to 'Start
+% Trial' and the second value is not equal to 'Start Trial'. If true, then
+% the second value represents the CS+ associated with the first room.
+
+% 2. If there is an error (e.g., two consecutive 'Start Trial' values),
+% then the third value is used instead.
+
+% 3. Double check for any error indices.
+
+% 4. Save the trial number, behavior (avoid/non-avoid), and CS type used in
+% the first room together in a new cell named 'savoid'.
+
+% 5. Identify if participants avoid the CS- in any trials. If yes, report
+% the trial number and subject numb
+
+for i  = 1:size(tn,1)
+
+    cst = sub1_behavior_phase2([sub1_behavior_phase2{:,3}] == i,12);     % coloum 12 = movment associated with cstype
+    roombeh = sub1_behavior_phase2([sub1_behavior_phase2{:,3}] == i,7);  % coloum 7 = ROOM (Room 1/ Room 2)
+
+    if strcmp(cst{1,1},inv) == 1 & strcmp(cst{2,1},inv) ~= 1
+
+        imov (i,1) = cst (2,1); %
+
+        % save type of room for the analysis of eye-tracking
+
+        iroomav (i,1) = roombeh (2,1);
+
+    elseif strcmp(cst{1,1},inv) == 1 & strcmp(cst{2,1}, inv) == 1
+
+        imov (i,1) = cst (3,1);
+        iroomav (i,1) = roombeh (3,1);
+
+
+    end
+
+end
+%%% check whether there is a wrong index (e.g., 'none')
+ckcsi = contains(inv,imov);
+
+if ckcsi ~= 0
+
+    disp(cksci,sn);
+end
+
+%%%%% save trials, behavior (avoid/non-avoid),cstype used in the first room
+%%%%% together in a new cell named 'savoid'
+
+for i = 1:size(tn,1)
+
+    savoid {i,1} = tn(i);
+    savoid {i,2} = iav(i);
+    savoid {i,3} = imov{i};
+
+end
+
+disp(savoid);
+
+% identify if a participants avoid cs- in some trials
+% report the trial number and subject number
+
+for i = 1:size(tn,1)
+
+    if isempty([savoid{i,2}] == 1 & contains(savoid(i,3), {'cs-'})) == 1
+        disp(i) % trial number
+        %     disp(ii) % subject number
+    end
+end
+
+%%  -----------  save behavior data in to a personal file   ---------------
+
+%  A new personal file include cs positive, behavior data, and eye-tracking data
+
+
+% index the location of CS positive
+s1.csp_location = cspi;
+
+% save savoid
+s1.mainanalysis_behavior.avoidance = savoid;
+
+
+% clear fcs ckcsi cst fcs  inv sub_avo
+% clear csi iav itr
+
