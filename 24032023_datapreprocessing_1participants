@@ -1123,7 +1123,7 @@ p2ientroom = sub1_behavior_phase2{find([sub1_behavior_phase2{:,3}]' == p2itnTFF(
      
   % index the probability of first fixation for next step
       p2iPFF = fax(find([fax{:,1}]' == p2itnTFF(i) ...
-            & (strcmp(fax(:,2),ics(2))|strcmp(fax(:,7),ics(1))),1,'first'),[1,2]);  
+            & (strcmp(fax(:,2),ics(2))|strcmp(fax(:,2),ics(1))),1,'first'),[1,2]);  
       p2test = [contains(ics(:),p2iPFF([p2iPFF{:,1}]' == p2itnTFF(i),2))];
        
      
