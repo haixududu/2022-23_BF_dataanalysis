@@ -11,18 +11,22 @@ tic
 % data for manipulation checking and data for main data analysis for each
 % participants
 
-% data structure (take the first participant as an example)
+% data structure (take the first participant as an example) 
 
-% sub1.cspositive_location = 'stretching'
-
-% sub1.personaltriats.
-
-% sub1.Pavolovn_fixation.firstfixation & totalfixation_csnegative & totalfixation_cspositive
-
-% sub1.avoidance_fixation. firstfixationroom1  & firstfixationroom2 &
-% totalfirxationroom1 & total fixationroom2
-
-% sub1.mainanalysis_behavior.avoidance
+    % sub1.csplus_location = 'stretching'
+    
+    % sub1.personaltriats. 
+    
+    % sub1.Pavlov_fixation.
+        % firstfixation & 
+        % totalfixation
+    
+    % sub1.Avoid_fixation. 
+        % firstfixation
+        % totalfirxation
+    
+    % sub1.Avoid_behavior.
+        % avoidance
 
 %%% Please read the 'readme' file for instructions on how to execute the script for each step.
 
@@ -1125,11 +1129,7 @@ evnmat2 = evnmat2(2:end,:);
 
 fax = evnmat2([evnmat2{:,4}]' > 0.1 & (strcmp(evnmat2(:,2), ics(1)) | strcmp(evnmat2(:,2), ics(2))) & strcmp(evnmat2(:,5), irme(1)),:);
 
-
-
-% identify the trial number of eye - tracking data used in phase 1
-
-isp2 = sub1_eye_phase2;
+% ------------ time to first fixation ----------
 
 % index the trial number 
 p2itnTFF = unique([sub1_eye_phase2{:,3}]');
@@ -1178,7 +1178,7 @@ p2ientroom = sub1_behavior_phase2{find([sub1_behavior_phase2{:,3}]' == p2itnTFF(
      
   % index the probability of first fixation for next step
       p2iPFF = fax(find([fax{:,1}]' == p2itnTFF(i) ...
-            & (strcmp(isp2(:,2),ics(2))|strcmp(isp2(:,7),ics(1))),1,'first'),[1,2]);  
+            & (strcmp(fx(:,2),ics(2))|strcmp(fx(:,7),ics(1))),1,'first'),[1,2]);  
       p2test = [contains(ics(:),p2iPFF([p2iPFF{:,1}]' == p2itnTFF(i),2))];
        
      
