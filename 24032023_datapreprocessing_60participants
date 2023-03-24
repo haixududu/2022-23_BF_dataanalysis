@@ -791,10 +791,13 @@ sub1_eye_phase2(:,8) = roomreplace;
 % until the first fixation (0.011s) on cs+ and cs- is made.
 
 % Strategy:
-% 1. Index the timestamp of the first step (behavior data) for each trial.
-% 2. Index the timestamp of the first onset fixation of cs+ and cs-.
-% 3. Calculate the time to the first fixation by subtracting the timestamp
-% of the first step from the timestamp of the first fixation.
+% 1. Identify the timestamp of the first step (behavior data) for each trial.
+% 2. Group the consistency segments with the same name.
+% 3. Calculate the duration of each group by subtracting the timestamp of the first segment from the timestamp of the last segment.
+% 4. Filter and identify the first fixation of cs type in a trial that has a duration of over 0.1 seconds.
+% 6. Calculate the time to the first fixation by subtracting the timestamp of the first step
+% from the timestamp of the first segment of the first fixation with a matching cs type.
+% 7. if there is no the first fixation of either cs+ or cs-, then time to the first fixation of the cs type is coded as 0. 
 
 
 % 4. Save the data into 
@@ -1020,14 +1023,17 @@ s(ix).Pavlov_fixation.totalfixation = tdcst;
 % Aim: To identify the time to first fixation associated with cs+ and cs-
 % in the first room 
 % Defination: To identify the duration from when the participant enters the room
-% until the first fixation (0.011s) on cs+ and cs- is made.
+% until the first fixation (0.1s) on cs+ and cs- is made.
 
 
 % Strategy:
-% 1. Index the timestamp of the first step (behavior data) for each trial.
-% 2. Index the timestamp of the first onset fixation of cs+ and cs-.
-% 3. Calculate the time to the first fixation by subtracting the timestamp
-% of the first step from the timestamp of the first fixation.
+% 1. Identify the timestamp of the first step (behavior data) for each trial.
+% 2. Group the consistency segments with the same name.
+% 3. Calculate the duration of each group by subtracting the timestamp of the first segment from the timestamp of the last segment.
+% 4. Filter and identify the first fixation of cs type in a trial that has a duration of over 0.1 seconds.
+% 6. Calculate the time to the first fixation by subtracting the timestamp of the first step
+% from the timestamp of the first segment of the first fixation with a matching cs type.
+% 7. if there is no the first fixation of either cs+ or cs-, then time to the first fixation of the cs type is coded as 0. 
 
 
 % --------- Step 10: identify the probability of the first fixation (PFF) for avoidance phase  --------------
@@ -1035,9 +1041,12 @@ s(ix).Pavlov_fixation.totalfixation = tdcst;
 %  ----- note -------
 
 % Aim: To identify the probability of the first fixation associated with
-% cs+ and cs-. Strategy: Aim: To identify the first fixation (0.011s) of cs
-% type. Within a trial, if the initial timestamp is on cs+, then it will be
-% coded as 1, cs- will be coded as 0,and vice versa.
+% cs+ and cs-. 
+% Strategy: To identify the first fixation of cs type within a trial, 
+% we match the cstype saved in 'the first fixation' with the list of ics{'cs-','cs+'}.
+% The results will be returned as either 1 or 0. A value of 1 indicates that the cs type is saved in the first fixation, 
+% and a value of 0 indicates that it is a non-first fixation on another cstype. The cs- is coded as 1 and cs+ is coded as 0, and vice versa.
+
 
 % data.frame for example:
 
