@@ -48,7 +48,7 @@ eyd = dir(fullfile('BF_DATA/BeyondFear_EYE_*'));
 sn = size(avo,1);
 
 % subject number for testing 
-ix = 1;
+ix = 3;
 
 
 
@@ -734,11 +734,11 @@ sub1_eye_phase2(:,8) = roomreplace;
 
 % Aim: To identify the time to first fixation associated with cs+ and cs- 
 % Defination: To identify the duration from when the participant enters the room
-% until the first fixation (0.011s) on cs+ and cs- is made.
+% until the first fixation (0.1s) on cs+ and cs- is made.
 
 % Strategy:
 % 1. Index the timestamp of the first step (behavior data) for each trial.
-% 2. Index the timestamp of the first onset fixation of cs+ and cs-.
+% 2. Index the timestamp of the initial timestamp of the first fixation of cs+ and cs- .
 % 3. Calculate the time to the first fixation by subtracting the timestamp
 % of the first step from the timestamp of the first fixation.
 
@@ -757,7 +757,9 @@ sub1_eye_phase2(:,8) = roomreplace;
 %  ----- note -------
 
 % Aim: To identify the probability of the first fixation associated with
-% cs+ and cs-. Strategy: Aim: To identify the first fixation (0.011s) of cs
+% cs+ and cs-. Strategy: 
+% 
+% Aim: To identify the first fixation (0.1s) of cs
 % type. Within a trial, if the initial timestamp is on cs+, then it will be
 % coded as 1, cs- will be coded as 0,and vice versa.
 
@@ -777,6 +779,7 @@ csnTFF = [];
 
 % save the row with initial timestamp of entering into the room
 ientroom = []; 
+evnmat = {}; 
 
 evnmat = {};
 
@@ -786,9 +789,48 @@ iPFF = {};
 test = [];
 %  ----------- TFF & PFF --------------
 
+% -------- group timestamps with a same name --------
+
+evn = 0;
+
+for i = 1:size (sub1_eye_phase1,1)
+
+    % index trial number
+    itrial1 = sub1_eye_phase1{i,3};
+
+    % index fixation on cstype
+    ifcs1 = sub1_eye_phase1 (i,7);
+
+    if isempty (evl) | ~strcmp (ifcs1(1),evl(1))
+
+        evn = evn+1;
+
+        t1 =  sub1_eye_phase1 {i,1};
+
+        evmat {evn, 1}  = trl;      % trial number
+        evmat {evn, 2}  = evl{1};   % cs type
+        evmat {evn, 3}  = [t0, t1]; % duration with starting and ending time
+        evmat {evn, 4}  = t1-t0;    % duration of fixation
+        evmat {evn, 5}  = t0;
+        t0  = t1;
+        evl = ifcs1;
+        trl = itrial1;
+    end
+end
+
+% fixation and duration for each trial 
+evmat = evmat(2:end,:);
+
+
+% filter the first fixation > 0.1s on cs type for each trial
+
+fx = evmat([evmat{:,4}]' > 0.1 & (strcmp(evmat(:,2), ics(1)) | strcmp(evmat(:,2), ics(2))),:);
+
+
+% -------------- time to first fixation -------------
+
 % identify the trial number of eye - tracking data used in phase 1
 
-isp1 = sub1_eye_phase1;
 
 % index the trial number 
 itnTFF = unique([sub1_eye_phase1{:,3}]');
@@ -812,30 +854,31 @@ for i = 1 : size(itnTFF,1)
     % of the first step from the timestamp of the first fixation.
 
 
-    if isempty(isp1(find([isp1{:,3}]' == itnTFF(i) & ...
-            strcmp(isp1(:,7),ics(2)),1))) == 1
+    if isempty(fx(find([fx{:,1}]' == itnTFF(i) & ...
+            strcmp(fx(:,2),ics(2)),1))) == 1
         
         cspTFF = 0; 
     else 
-     cspTFF = isp1{find([isp1{:,3}]' == itnTFF(i) & ...
-            strcmp(isp1(:,7),ics(2)),1),1} - ientroom;
+     cspTFF = fx{find([fx{:,1}]' == itnTFF(i) & ...
+            strcmp(fx(:,2),ics(2)),1),5} - ientroom;
      
     end 
     
-    if isempty(isp1(find([isp1{:,3}]' == itnTFF(i) & ...
-            strcmp(isp1(:,7),ics(1)),1))) == 1
+    if isempty(fx(find([fx{:,1}]' == itnTFF(i) & ...
+            strcmp(fx(:,2),ics(1)),1))) == 1
         
         csnTFF = 0; 
     else 
-     csnTFF = isp1{find([isp1{:,3}]' == itnTFF(i) & ...
-            strcmp(isp1(:,7),ics(1)),1),1} - ientroom;
+     csnTFF = fx{find([fx{:,1}]' == itnTFF(i) & ...
+            strcmp(fx(:,2),ics(1)),1),5} - ientroom;
    
     end 
  
      
   % index the probability of first fixation for next step
-      iPFF = isp1(find([isp1{:,3}]' == itnTFF(i) & ...
-            (strcmp(isp1(:,7),ics(2))|strcmp(isp1(:,7),ics(1))),1,'first'),[3,7]);  
+      iPFF = fx(find([fx{:,1}]' == itnTFF(i) & ...
+            (strcmp(fx(:,2),ics(2))|strcmp(fx(:,2),ics(1))),1,'first'),[1,2]);  
+      
       test = [contains(ics(:),iPFF([iPFF{:,1}]' == itnTFF(i),2))];
        
 
@@ -866,46 +909,8 @@ s1.Pavlov_fixation.timetoFixfixation = evnmat;
 % In case there is no fixation recorded for one of the cs types in a trial,
 % we identify the trial number associated with the duration of each cstype
 
-evmat = {}; 
+
 tdcst = {};
-
-
-% -------- group timestamps with a same name --------
-
-evn = 0;
-
-for i = 1:size (sub1_eye_phase1,1)
-
-    % index trial number
-    itrial1 = sub1_eye_phase1{i,3};
-
-    % index fixation on cstype
-    ifcs1 = sub1_eye_phase1 (i,7);
-
-    % identify a group elememts with a same name
-
-    if isempty (evl) | ~strcmp (ifcs1(1),evl(1))
-
-        evn = evn+1;
-
-        t1 =  sub1_eye_phase1 {i,1};
-
-        evmat {evn, 1}  = trl;      % trial number
-        evmat {evn, 2}  = evl{1};   % cs type
-        evmat {evn, 3}  = [t0, t1]; % duration with starting and ending time
-        evmat {evn, 4}  = t1-t0;    % duration of fixation
-
-        t0  = t1;
-        evl = ifcs1;
-        trl = itrial1;
-    end
-end
-
-%%%%% fixation and duration for each trial %%%%%
-
-evmat = evmat(2:end,:);
-
-
 
 %  clear itrial1 ifcs1 evl trl t0 t1 fftrialnam cspi
 
@@ -968,12 +973,13 @@ s1.Pavlov_fixation.totalfixation = tdcst;
 % Aim: To identify the time to first fixation associated with cs+ and cs-
 % in the first room 
 % Defination: To identify the duration from when the participant enters the room
-% until the first fixation (0.011s) on cs+ and cs- is made.
+% until the first fixation (0.1s) on cs+ and cs- is made.
 
 
 % Strategy:
 % 1. Index the timestamp of the first step (behavior data) for each trial.
-% 2. Index the timestamp of the first onset fixation of cs+ and cs-.
+% 2. Index the timestamp of the first fixation of cs+ and cs-.
+     
 % 3. Calculate the time to the first fixation by subtracting the timestamp
 % of the first step from the timestamp of the first fixation.
 
@@ -994,9 +1000,13 @@ s1.Pavlov_fixation.totalfixation = tdcst;
  
 
 % ------------ Parameter --------------
-%  trialnumber
+% save data y 
 
+ evnmat2 = {}; 
+
+%  trialnumber
 p2itnTFF =[];
+
 % save the row with initial timestamp associated with cs+
 p2cspTFF = []; 
 
@@ -1015,9 +1025,55 @@ p2test = [];
 
 %  ----------- TFF & PFF --------------
 
+% -------- group timestamps with a same name --------
+
+evn = 0;
+
+for i = 1:size (sub1_eye_phase2,1)
+
+    % index trial number
+    itrial2 = sub1_eye_phase2{i,3};
+
+    % index fixation on cstype
+    ifcs2 = sub1_eye_phase2 (i,7);
+
+    % index fixation on room
+
+    ifrm = sub1_eye_phase2 {i,8};
+
+    % create a new cell with
+
+    if isempty (evl2) | ~strcmp (ifcs2(1),evl2(1))
+
+        evn = evn+1;
+
+        t1 =  sub1_eye_phase2 {i,1};
+         
+        evnmat2 {evn, 1}  = trl2;      % trial number
+        evnmat2 {evn, 2}  = evl2{1};   % cs type
+        evnmat2 {evn, 3}  = [t0, t1];  % duration with starting and ending time
+        evnmat2 {evn, 4}  = t1-t0;     % duration of fixation
+        evnmat2 {evn, 5}  = rnn;       % index the 1st and 2nd room
+        evnmat2 {evn, 6}  = t0;
+
+
+        t0  = t1;
+        evl2 = ifcs2;
+        trl2 = itrial2;
+        rnn = ifrm;
+    end
+end
+
+evnmat2 = evnmat2(2:end,:);
+
+% --- filter data associated with cs type --------
+
+fax = evnmat2([evnmat2{:,4}]' > 0.1 & (strcmp(evnmat2(:,2), ics(1)) | strcmp(evnmat2(:,2), ics(2))) & strcmp(evnmat2(:,5), irme(1)),:);
+
+% -------- TFF  --------------
+
 % identify the trial number of eye - tracking data used in phase 1
 
-isp2 = sub1_eye_phase2;
 
 % index the trial number 
 p2itnTFF = unique([sub1_eye_phase2{:,3}]');
@@ -1040,39 +1096,34 @@ p2ientroom = sub1_behavior_phase2{find([sub1_behavior_phase2{:,3}]' == p2itnTFF(
     % of the first step from the timestamp of the first fixation.
 
 
-    if isempty(isp2(find([isp2{:,3}]' == p2itnTFF(i) ...
-             & strcmp(isp2(:,8),irme(1))...
-             & strcmp(isp2(:,7),ics(2)),1))) == 1
+    if isempty(fax(find([fax{:,1}]' == p2itnTFF(i) ...
+             & strcmp(fax(:,2),ics(2)),6))) == 1
         
         p2cspTFF = 0;
   
     else 
         
-     p2cspTFF = isp2{find([isp2{:,3}]' == p2itnTFF(i) ...
-         & strcmp(isp2(:,8),irme(1))...
-         & strcmp(isp2(:,7),ics(2)),1),1} - p2ientroom;
+     p2cspTFF = fax{find([fax{:,1}]' == p2itnTFF(i) ...
+         & strcmp(fax(:,2),ics(2)),1),6} - p2ientroom;
 %      
     end 
     
-    if isempty(isp2(find([isp2{:,3}]' == p2itnTFF(i) ...
-            & strcmp(isp2(:,8),irme(1))...
-            & strcmp(isp2(:,7),ics(1)),1))) == 1
+    if isempty(fax(find([fax{:,1}]' == p2itnTFF(i) ...
+            & strcmp(fax(:,2),ics(1)),1))) == 1
         
         p2csnTFF = 0;
 
     else 
 
-     p2csnTFF = isp2{find([isp2{:,3}]' == p2itnTFF(i) ...
-            & strcmp(isp2(:,8),irme(1))...
-            & strcmp(isp2(:,7),ics(1)),1),1} - p2ientroom;
+     p2csnTFF = fax{find([fax{:,1}]' == p2itnTFF(i) ...
+            & strcmp(fax(:,2),ics(1)),1),6} - p2ientroom;
    
     end 
  
      
   % index the probability of first fixation for next step
-      p2iPFF = isp2(find([isp2{:,3}]' == p2itnTFF(i) ...
-            & strcmp(isp2(:,8),irme(1))...
-            & (strcmp(isp2(:,7),ics(2))|strcmp(isp2(:,7),ics(1))),1,'first'),[3,7]);  
+      p2iPFF = fax(find([fax{:,1}]' == p2itnTFF(i) ...
+            & (strcmp(isp2(:,2),ics(2))|strcmp(isp2(:,7),ics(1))),1,'first'),[1,2]);  
       p2test = [contains(ics(:),p2iPFF([p2iPFF{:,1}]' == p2itnTFF(i),2))];
        
      
@@ -1103,60 +1154,14 @@ s1.Avoid_fixation.timetoFixfixation = evnmat;
 
 
 % -------- Parameter ----------------
-     
-  evnmat2 = {}; 
 
        it = {};
       iti = {}; 
    p2tcsp = [];
    p2tcsn = [];
-  evnmat2 = {}; 
+
 p2r1tdcst = {};
 
-% -------- group timestamps with a same name --------
-
-
-evn = 0;
-
-
-for i = 1:size (sub1_eye_phase2,1)
-
-    % index trial number
-    itrial2 = sub1_eye_phase2{i,3};
-
-    % index fixation on cstype
-    ifcs2 = sub1_eye_phase2 (i,7);
-
-    % index fixation on room
-
-    ifrm = sub1_eye_phase2 {i,8};
-
-    % create a new cell with
-
-    if isempty (evl2) | ~strcmp (ifcs2(1),evl2(1))
-
-        evn = evn+1;
-
-        t1 =  sub1_eye_phase2 {i,1};
-        
-
-        
-        evnmat2 {evn, 1}  = trl2;      % trial number
-        evnmat2 {evn, 2}  = evl2{1};   % cs type
-        evnmat2 {evn, 3}  = [t0, t1];  % duration with starting and ending time
-        evnmat2 {evn, 4}  = t1-t0;     % duration of fixation
-        evnmat2 {evn, 5}  = rnn;       % index the value in room
-
-
-
-        t0  = t1;
-        evl2 = ifcs2;
-        trl2 = itrial2;
-        rnn = ifrm;
-    end
-end
-
-evnmat2 = evnmat2(2:end,:);
 
 % -------- total fixation duration for the 1st_room ------
 
@@ -1210,5 +1215,7 @@ end
 % -----------  save total fixation duration in to a personal file   ---------------
 
 s1.Avoid_fixation.totalfixationr1 = p2r1tdcst;
+
+ 
 
  
