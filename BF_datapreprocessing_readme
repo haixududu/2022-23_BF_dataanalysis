@@ -1,0 +1,347 @@
+
+%% BF-data preprocessing 
+
+% ------- note -------
+% This script aims to build an structure includes personal traits,
+% data for manipulation checking and data for main data analysis for each
+% participants
+
+% data structure (take the first participant as an example) 
+
+    % sub1.cspositive_location = 'stretching'
+    
+    % sub1.personaltriats. 
+    
+    % sub1.manipulation_fixation.
+        % firstfixation & 
+        % totalfixation_csnegative &
+        % totalfixation_cspositive  
+    
+    % sub1.mainanalysis_fixation. 
+        % firstfixationroom1  & 
+        % firstfixationroom2 &
+        % totalfirxationroom1 & 
+        % total fixationroom2
+    
+    % sub1.mainanalysis_behavior.
+        % avoidance
+
+%%% Please read the 'readme' file for instructions on how to execute the script for each step.
+
+
+%% ------- step 1: read data  -------
+
+% 1. Create a new varible name to Assigns the path to the directory containing
+% the BF daya 
+
+% 2. Obtain a list of files in the
+% directory whose filenames start with 'BeyondFear_1' & 'BeyoundFear_EYE_', and assigns the
+% resulting structure array to a variable named 'avo' & 'eyd', which save the behavior data and eye-tracking in structures respectively.
+
+
+%% ---- step 2: identify the movment associated with CS type (behavior data) --------
+
+%  aim: assign the cstype to the movements (bending and stretching) 
+
+%  1. identify the cs positive which is saved in coloum 4
+
+%  2. extract movemnet data from coloun 9 which is contained three type of
+%  value ('none', 'bending', 'stretching')
+
+%  3. assign the cstype to the movements (bending and stretching) into new
+%  array (movments associated with cstype) 
+    % a.if the value in coloum 9 is equal to 'none' 'none' is saved in coloum 12 
+    % b. if the value in coloum 9 is equal to the value saved in cspi, 'cs+' is saved in coloum 12 
+    % c. other value is saved in colloum 12 as 'cs-'
+
+   
+% data.frame for example
+
+% phase, trial, cspositive  movement,  cstype 
+
+%  1      1     stretching    none       'none'
+%  1      1     stretching   stretching  'cs+'
+
+
+
+%% ------ step 3: split behavior data into phases ----------
+
+% ----- note ---- 
+% There is no avoidance tested in the manipulation phase, thus, we only
+% save behaviror data of phase 2 (avoidance phase) and phase 3 (exploration
+% phase) 
+% if a participant doesn't finish 48 trials reported it and display the
+% missing trial and subject number 
+
+% ----- split files  ---- 
+% index the type of phases
+% pn = unique(sub_avo(:, 2)); 
+
+% filtered data: match the value in coloum2 ('phase') and variable "pn', only if the
+% result is return to 1, save the rows into sub1_behavior_phase*
+% seperately
+
+%% ------ step 4: code avoidance/no-avoidance  ------------
+
+% --------- types of avoidance ---------------
+% T1. cs+ ----> cs- 
+% T2. cs- ----> cs+ 
+
+% ---- type 1 & 2  -----
+
+% We defined avoidance that If a subject switch rooms(avoid) from room
+% assicated with cs+ to cs- ,vice verse, there is two types of rooms.
+
+% To identify the avoidance, the strategy is that to identify types of
+% rooms contained in a trial. 
+
+% if a trail contains each one of room, value will return to a logic number '1'. Then sum the logic
+% number, if the result >1, that indicates avoidance.
+
+% To indicate which stimulus participants avoid, we identify the cs types
+% used the in the first room. Then, write the number of trial, behavior
+% (binary data), and cs type used in the first room into one file. 
+
+
+% ---- identify CS type used in first room -------
+
+% extact cs type used in the first room
+% A trial in our VR environment involves at least 5 steps to complete the
+% task. And the typic avoidance and non-avoidance are recorded as following:
+
+% non-avoidance 
+
+    %       Teleport        CStype 
+    %      'Start Trial'    'none'
+    % 'Teleport_Room2_1'    'cs+'
+    % 'Teleport_Room2_2'    'cs+'
+    % 'Teleport_Room2_3'    'cs+'
+    % 'Teleport_Room2_4'    'cs+'
+    %        'placebook'    'cs+'
+
+% avoidance 
+
+    %          Teleport    CStype 
+    %     'Start Trial'    'none'
+    % 'Teleport_Room2_1'    'cs+'
+    %       Start Trial    'none'
+    % 'Teleport_Room1_1'    'cs-'
+    % 'Teleport_Room1_2'    'cs-'
+    % 'Teleport_Room1_3'    'cs-'
+    % 'Teleport_Room1_4'    'cs-'
+    %        'placebook'    'cs-'
+
+% To identify the cs type used in the first room, we employ the following strategy:
+
+    % 1. Check if the first value in the 'phase' column is equal to 'Start
+    % Trial' and the second value is not equal to 'Start Trial'. If true, then
+    % the second value represents the CS+ associated with the first room.
+    
+    % 2. If there is an error (e.g., two consecutive 'Start Trial' values),
+    % then the third value is used instead.
+    
+    % 3. Double check for any error indices.
+    
+    % 4. Save the trial number, behavior (avoid/non-avoid), and CS type used in
+    % the first room together in a new cell named 'savoid'.
+    
+    % 5. Identify if participants avoid the CS- in any trials. If yes, report
+    % the trial number and subject numb
+
+
+
+%  -----------  save behavior data in to a personal file   ---------------
+
+%  A new ersonal file include cs positive, behavior data, and eye-tracking data 
+
+% s1.mainanalysis_behavior.avoidance = savoid;
+
+% index the location of CS positive
+% s1.csp_location = cspi;
+
+
+%% -----------  Eye-tracking data  ---------------
+
+%% --------- step 5: data preprocessing --------
+
+% ---------- 1. unify the name of AOIS assoicated with movemnts ---------
+
+% AOIS in upper shelf('Bookcase Top Row','Empty Spot Top') are renamed as stretching
+% AOIS in lower shelf('Bookcase Bottom Row','Empty Spot Bottom') are
+% renamed as bending
+
+% ---------- 2. assign the cstype to movement -------------
+
+% involves assigning the movement associated with each cs type to a variable called 'foc.'
+% If the first movement in the 'mov' array ('stretching') matches the cs+ associated with the movement, 
+% then the corresponding value in 'foc' is assigned as 'cs+'.
+% Conversely, if the second movement in 'mov' ('bending') matches the cs-, then the
+% corresponding value in 'foc' is assigned as 'cs-.'; vice verse. 
+
+
+% ------------ 3. create a new variable - Room ------------
+
+% Room contains two values : 1st room and 2nd room 
+% For the first phase, there is only 1st room for each trial.
+
+% For the second  
+% to assign the values in the variable, we will match the value of room in
+% behavior data. If the result returns to 1, then the value is assinged as "1st
+% room". then others is assinged as "2nd room" 
+
+
+% ------------ 4. add new variables to sub_eye -------------
+
+% sub_eye(:,7) = foc;  
+% sub_eye(:,8) = room;
+% sub_eye(:,4) = csmov;
+
+
+% --------- 5. check the proportion of invalid data -----------
+
+% if invalid data (coded as -1) is larger than 75% than the subject will be
+% deleted.
+
+% pupil dialtion is involved in left and right eyes respectively
+% The report of proportion of invalid data 
+
+% data.frame for example 
+
+% invaid data(left),    size,     propotion, 
+
+%              -1	    2800	   0.0337
+% invalid data (right),  size,     propotion 
+%               -1	    2283	   0.0275
+ 
+
+
+% ------ 6. check the proportion of invalid data associated with AOIs ---
+
+
+% -------- 7. plot data -------------
+
+% plot1:use histogram plot to show the distrubition of the size of
+% pupil-dilation associated with target aois (upper shelf and lower shelf)
+
+% ---- 8. remove the eye-tracking data which is recorded by delaying -----
+
+% Exclude the eye-tracking data recorded during
+% a trial if there was a delay in the previous trial and participants had
+% not yet started the current trial.
+
+% Strategy: indentify the location of eye-blinkings and remove eye-blinkings
+
+% -------- 9. plot modified pupil dilation --------
+
+% use histogram plot to show the distrubition of the modified pupil dilation
+% data 
+
+
+% ------ 10. remove the eye-tracking data which is recorded by delaying---
+
+% Exclude the eye-tracking data recorded during
+% a trial if there was a delay in the previous trial and participants had
+% not yet started the current trial.
+
+% Strategy : 
+% As the incorrect data occurs as the first timestamp for a trial, we save
+% data starting from the second timestamp until the end of the trial.
+
+
+% --- 11.identify the first  room where participants entered in phase 2 ---
+
+% note: there is only room 1 in phase 1. Thus, we firstly identify the the
+% first and second room where participants entered in phase 2. For phase 3,
+% we will do it later. 
+%
+
+% ------ 12. split the files base on phases ------
+% same as the strategy used in processing behavior data
+
+%%  --------- step 6: idenfity the time to first fixation for Pavlov phase -------------
+
+%   ------- note -----------
+
+% Aim: To identify the time to first fixation associated with cs+ and cs- 
+% Defination: To identify the duration from when the participant enters the room
+% until the first fixation (0.011s) on cs+ and cs- is made.
+
+% Strategy:
+% 1. Index the timestamp of the first step (behavior data) for each trial.
+% 2. Index the timestamp of the first onset fixation of cs+ and cs-.
+% 3. Calculate the time to the first fixation by subtracting the timestamp
+% of the first step from the timestamp of the first fixation.
+
+
+% 4. Save the data into 
+    % s(ix).pavlovian_phase.TFF
+    % s(ix).avoidance_phase.TFF
+
+%  data.frame for example 
+
+%  phase, trial,  TFF_csp, TFF_csn
+%       1,     1,    2.23,   2.24, 
+
+%% --------- step 7: identify the probability of the first fixation (PFF) --------------
+
+%  ----- note -------
+
+% Aim: To identify the probability of the first fixation associated with
+% cs+ and cs-. Strategy: Aim: To identify the first fixation (0.011s) of cs
+% type. Within a trial, if the initial timestamp is on cs+, then it will be
+% coded as 1, cs- will be coded as 0,and vice versa.
+
+% data.frame for example:
+
+%  trial,   cs+ ,   TFF,   PFF,   cs-,  TFF,   PFF,
+%     1,    cs+ ,  2.23,     0,   cs-,  2.24,    1,
+ 
+
+%% ----- step 8 identify total fixation duration for Pavlov phase ------------
+
+% Aim： to idenftiy total fixation duration
+% total fixation duration is calculated by summing up all timestamps of cs+
+% and cs- seperately. 
+% In case there is no fixation recorded for one of the cs types in a trial,
+% we identify the trial number associated with the duration of each cstype
+
+%% --------- Step 9: idenfity time to first fixation for avoidance pahse  -------------
+
+% --------- note  -------------
+
+% Aim: To identify the time to first fixation associated with cs+ and cs-
+% in the first room 
+% Defination: To identify the duration from when the participant enters the room
+% until the first fixation (0.011s) on cs+ and cs- is made.
+
+
+% Strategy:
+% 1. Index the timestamp of the first step (behavior data) for each trial.
+% 2. Index the timestamp of the first onset fixation of cs+ and cs-.
+% 3. Calculate the time to the first fixation by subtracting the timestamp
+% of the first step from the timestamp of the first fixation.
+
+
+%% --------- Step 10: identify the probability of the first fixation (PFF) for avoidance phase  --------------
+
+%  ----- note -------
+
+% Aim: To identify the probability of the first fixation associated with
+% cs+ and cs-. Strategy: Aim: To identify the first fixation (0.011s) of cs
+% type. Within a trial, if the initial timestamp is on cs+, then it will be
+% coded as 1, cs- will be coded as 0,and vice versa.
+
+% data.frame for example:
+
+%  trial,   cs+ ,   TFF,   PFF,   cs-,  TFF,   PFF,
+%     1,    cs+ ,  2.23,     0,   cs-,  2.24,    1,
+ 
+%% ----- step 11: identify total fixation duration for avoidance phase (the 1st_room)------------
+
+% --------- note -----------------
+% Aim： to idenftiy total fixation duration
+% total fixation duration is calculated by summing up all timestamps of cs+
+% and cs- seperately in the first room. 
+% In case there is no fixation recorded for one of the cs types in a trial,
+% we identify the trial number associated with the duration of each cstype
+
