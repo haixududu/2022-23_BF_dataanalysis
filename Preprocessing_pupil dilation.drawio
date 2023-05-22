@@ -1,0 +1,46 @@
+<mxfile host="app.diagrams.net" modified="2023-05-22T14:29:36.300Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36" etag="UoHFwhV3I0TPT0uMctGU" version="21.2.4" type="github">
+  <diagram name="第 1 页" id="VAMxYnleN22QML6oUBr0">
+    <mxGraphModel dx="1194" dy="766" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="qU45uo9Rk5HEbrporvGn-12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qU45uo9Rk5HEbrporvGn-1" target="qU45uo9Rk5HEbrporvGn-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qU45uo9Rk5HEbrporvGn-1" value="Checking proportion of invalid data for both left and right eyes for per trial and per person&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="180" y="450" width="360" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="qU45uo9Rk5HEbrporvGn-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qU45uo9Rk5HEbrporvGn-2" target="qU45uo9Rk5HEbrporvGn-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qU45uo9Rk5HEbrporvGn-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qU45uo9Rk5HEbrporvGn-2" target="qU45uo9Rk5HEbrporvGn-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qU45uo9Rk5HEbrporvGn-2" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="660" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qU45uo9Rk5HEbrporvGn-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qU45uo9Rk5HEbrporvGn-4" target="qU45uo9Rk5HEbrporvGn-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qU45uo9Rk5HEbrporvGn-4" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="840" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qU45uo9Rk5HEbrporvGn-6" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="1020" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qU45uo9Rk5HEbrporvGn-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qU45uo9Rk5HEbrporvGn-8" target="qU45uo9Rk5HEbrporvGn-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qU45uo9Rk5HEbrporvGn-8" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="660" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qU45uo9Rk5HEbrporvGn-10" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="690" y="660" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qU45uo9Rk5HEbrporvGn-14" value="&lt;h1&gt;Preprocessing in Pupil dilation&amp;nbsp;&lt;/h1&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="165" y="308" width="380" height="70" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
