@@ -1,20 +1,14 @@
-<mxfile host="app.diagrams.net" modified="2023-05-22T15:36:07.620Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36" etag="pvi_LKn842pG15-0mBtd" version="21.2.4" type="github">
+<mxfile host="app.diagrams.net" modified="2023-05-22T16:06:42.561Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36" etag="THQmXjFkeJiA65KNLZfV" version="21.2.4" type="github">
   <diagram name="第 1 页" id="VAMxYnleN22QML6oUBr0">
     <mxGraphModel dx="2021" dy="766" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="qU45uo9Rk5HEbrporvGn-14" value="&lt;h1&gt;Preprocessing in Pupil dilation&amp;nbsp;&lt;/h1&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="80" y="230" width="380" height="70" as="geometry" />
+          <mxGeometry x="160" y="310" width="380" height="70" as="geometry" />
         </mxCell>
         <mxCell id="BT4phYu5JlUOmxXtcWHX-3" value="proportion of invalid eye-tracking collection&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="20" y="360" width="120" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="BT4phYu5JlUOmxXtcWHX-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0.022;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="BT4phYu5JlUOmxXtcWHX-4" target="BT4phYu5JlUOmxXtcWHX-5">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="BT4phYu5JlUOmxXtcWHX-4" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="290" y="360" width="120" height="60" as="geometry" />
+          <mxGeometry y="440" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="BT4phYu5JlUOmxXtcWHX-7" value="yes&amp;nbsp;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="BT4phYu5JlUOmxXtcWHX-5">
           <mxGeometry relative="1" as="geometry">
@@ -38,8 +32,8 @@
         </mxCell>
         <mxCell id="BT4phYu5JlUOmxXtcWHX-12" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" edge="1" parent="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="-20" y="1040" as="sourcePoint" />
-            <mxPoint x="770" y="1040" as="targetPoint" />
+            <mxPoint y="860" as="sourcePoint" />
+            <mxPoint x="790" y="860" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="BT4phYu5JlUOmxXtcWHX-19" value="yes&amp;nbsp;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="BT4phYu5JlUOmxXtcWHX-16" target="BT4phYu5JlUOmxXtcWHX-18">
@@ -73,6 +67,9 @@
         <mxCell id="BT4phYu5JlUOmxXtcWHX-16" value="Does the person have&amp;nbsp; invalid trials over 50%&amp;nbsp;" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;" vertex="1" parent="1">
           <mxGeometry x="275" y="600" width="150" height="90" as="geometry" />
         </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-38" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="BT4phYu5JlUOmxXtcWHX-28" target="BT4phYu5JlUOmxXtcWHX-33">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
         <mxCell id="BT4phYu5JlUOmxXtcWHX-28" value="eye-blinking&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="285" y="880" width="120" height="60" as="geometry" />
         </mxCell>
@@ -90,6 +87,68 @@
         </mxCell>
         <mxCell id="BT4phYu5JlUOmxXtcWHX-36" value="if&amp;nbsp;" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;" vertex="1" parent="1">
           <mxGeometry x="520" y="740" width="150" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-41" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="BT4phYu5JlUOmxXtcWHX-39">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="345" y="1140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-39" value="Cue spline interpolation" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="285" y="1000" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-44" value="Baseline correction" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1140" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="BT4phYu5JlUOmxXtcWHX-45">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="345" y="1290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-50" value="Yes&amp;nbsp;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="BT4phYu5JlUOmxXtcWHX-46">
+          <mxGeometry x="-0.2728" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-48" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="BT4phYu5JlUOmxXtcWHX-45" target="BT4phYu5JlUOmxXtcWHX-47">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-49" value="no" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="BT4phYu5JlUOmxXtcWHX-48">
+          <mxGeometry x="-0.0105" y="-4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-45" value="Does the trial contains&amp;nbsp;&lt;br style=&quot;font-size: 9px;&quot;&gt;90 sample prior onset of a conditional stimulu" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="270" y="1140" width="150" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-47" value="Remove the trial" style="whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="515" y="1155" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-54" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="BT4phYu5JlUOmxXtcWHX-52" target="BT4phYu5JlUOmxXtcWHX-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-52" value="Average the samples&amp;nbsp;" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="1290" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-57" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="BT4phYu5JlUOmxXtcWHX-53" target="BT4phYu5JlUOmxXtcWHX-56">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-53" value="subtract the baseline from pupil data collected from each timestamp&amp;nbsp;" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="1430" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-55" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint y="1090" as="sourcePoint" />
+            <mxPoint x="820" y="1090" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-56" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="1570" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-60" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-10" y="1560" as="sourcePoint" />
+            <mxPoint x="660" y="1569.178082191781" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
