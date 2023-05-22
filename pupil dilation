@@ -1,1 +1,808 @@
 
+clear all
+clc
+
+tic
+
+%% data preprocessing for one subject
+
+% ------- note ------
+% This script aims to build an structure includes personal traits,
+% data for manipulation checking and data for main data analysis for each
+% participants
+
+% data structure (take the first participant as an example) 
+
+    % sub1.csplus_location = 'stretching'
+    
+    % sub1.personaltriats. 
+    
+    % sub1.Pavlov_fixation.
+        % firstfixation & 
+        % totalfixation
+    
+    % sub1.Avoid_fixation. 
+        % firstfixation
+        % totalfirxation
+    
+    % sub1.Avoid_behavior.
+        % avoidance
+
+%%% Please read the 'readme' file for instructions on how to execute the script for each step.
+
+%%% Please read the 'readme' file for instructions on how to execute the script for each step.
+
+
+%% --------- Step 1: read data and unify the name of AOIs for further analysis  ------------
+
+% Aim: Assigns the path to the directory containing the data to a
+% variable named 'bfp'
+bfp = 'BF_DATA';
+
+% Obtain a list of files in the
+% directory whose filenames start with 'BeyondFear_1', and assigns the
+% resulting structure array to a variable named 'avo', which save the data in a structure.
+avo = dir(fullfile('BF_DATA/BeyondFear_1*'));
+
+% obtain a list of files in the
+% directory whose filenames start with 'BeyondFear_EYE_', and assigns the
+% resulting structure array to a variable named 'eyd'.
+eyd = dir(fullfile('BF_DATA/BeyondFear_EYE_*'));
+
+% subject numbr
+
+sn = size(avo,1);
+
+% subject number for testing 
+
+ev = 0;
+eve = 0;
+
+ for ix = 13
+
+    % Uses the "fullfile" function to create a filename by combining the
+    % directory path "bfp" and the "name" field of avoid
+
+    filnam = fullfile(bfp,avo(ix).name);
+    fav = readtable(filnam);
+
+    % for further analysis, the data is save as cell
+    sub_avo = table2cell(fav);
+
+    % save eye-tracking data into cell
+    edname = fullfile(bfp,eyd(ix).name);
+    eyt = readtable(edname);
+    sub_eye = table2cell(eyt);
+
+
+
+% clear filnam edname bfp fav
+% clear  eyd eyt
+
+%% ---- Step 2: identify the movment associated with CS type --------
+% Aim: assign the cs type to the movemnets in a new array (couloum 12)
+% Stratgy:
+
+%  1. identify the cs positive which is saved in coloum 4
+
+%  2. extract movemnet data from coloun 9 which is contained three type of
+%  value ('none', 'bending', 'stretching')
+
+%  3. assign the cstype to the movements (bending and stretching) into new
+%  array (movments associated with cstype) 
+    % a.if the value in coloum 9 is equal to 'none' 'none' is saved in coloum 12 
+    % b. if the value in coloum 9 is equal to the value saved in cspi, 'cs+' is saved in coloum 12 
+    % c. other value is saved in colloum 12 as 'cs-'
+
+   
+% data.frame for example
+
+% phase, trial, cspositive  movement,  cstype 
+
+%  1      1     stretching    none       'none'
+%  1      1     stretching   stretching  'cs+'
+
+% --------------- assign cs type into movment ----------
+
+% identify the cspositive used
+cspi = {};
+cspi = sub_avo{1,4};
+
+% extract movemnet data from coloun 9 which is contained three type of value
+% none, bending, stretching
+
+for i  = 1:size(sub_avo,1)
+    % if the value in coloum 9 is equal to 'none' 'none' is saved in coloum
+    % 12
+    if  strcmp(sub_avo(i,9),'none') == 1
+
+        sub_avo(i,12) = {['none']};
+        % if the value in coloum 9 is equal to the value saved in cspi, 'cs+' is saved in coloum
+        % 12
+    elseif strcmp(sub_avo(i,9),cspi) == 1
+
+        sub_avo(i,12) = {['cs+']};
+    else
+        % other value is saved in colloum 12 as 'cs-'
+        sub_avo(i,12) = {['cs-']};
+
+    end
+
+end
+
+
+%% --------- Step 3: split behavior data into phases -------------
+
+% ----- note ----
+% There is no avoidance tested in the manipulation phase,
+% thus, we only save behaviror data of phase 2 (avoidance phase) and phase
+% 3 (exploration phase)
+
+
+% ----- parameters  ----
+
+% Phase name
+pn = unique(sub_avo(:, 2));
+
+% Trial number
+tn = unique([sub_avo{:, 3}]');
+
+% full trial number 1:48
+
+fn = [1:48]';
+
+% if a participant doesn't finish 48 trials reported it and display the
+% missing trial and subject number
+
+if isequal(tn,fn) ~= 1
+    disp(i)
+    misstrial = fn(ismember(fn,tn)== 0)
+end
+
+
+
+% ----- split files  ----
+
+for i = 1: size(pn,1)
+
+    %filtered data: match the value in coloum2 ('phase') and variable "phase', only if the
+    %result is return to 1, save the rows into sub1_behavior_phase*
+    %seperately
+
+    sub1_behavior_phase1 = sub_avo(strcmp(sub_avo(:,2),pn{1}),:); % coloum 2 = 'phase'
+    sub1_behavior_phase2 = sub_avo(strcmp(sub_avo(:,2),pn{2}),:); 
+    sub1_behavior_phase3 = sub_avo(strcmp(sub_avo(:,2),pn{3}),:);
+
+end
+
+% clear fn avo
+
+%% ----------- Avoidance behavior  ---------------
+
+%  ------- parameter for behavior data ----------
+
+%%% < identify avoidance >
+
+% room type
+rm = {['Room 1'],['Room 2']};
+
+% identify type of rooms based on trials
+itr = {};
+
+% identify avoidance
+iav = [];
+
+
+%%% < identify CStype >
+
+% index step in the hall
+inv = ['none'];
+
+% cstype used in rooms
+cst = {};
+
+% index movmemnt used in the first room
+imov = {};
+
+% index number of room used in the first room
+iroomav = {};
+
+% index cs type
+ics = {['cs-'],['cs+']};
+
+% save all data in a structure of avoiance
+
+savoid = {};
+
+% phase number
+
+phase = {['phase1'];['phase2'];'phase3'};
+
+
+
+%% ---- Step 4: code avoidance/no-avoidance -----
+
+% four type of avoidance
+% cs+ ----> cs-
+% cs- ----> cs+
+
+
+% cs- ----> cs-
+% cs+ ----> cs+
+
+% ---- type 1 & 2 -----
+
+% We defined avoidance that If a subject switch rooms(avoid) from room
+% assicated with cs+ to cs- ,vice verse, there is two types of rooms.
+
+% To identify the avoidance, the strategy is that to identify types of
+% rooms contained in a trial.
+
+% if a trail contains each one of room, value will return to a logic number '1'. Then sum the logic
+% number, if the result >1, that indicates avoidance.
+
+for i = 1:size(tn,1)
+
+    itr = sub1_behavior_phase2([sub1_behavior_phase2{:,3}] == i,7); % coloum 3 = Trial, coloum 7 = ROOM
+    iavi = sum(contains(rm,itr),"all"); %%%%%% avoiance index %%%%%%%
+
+    if iavi == 1
+        iav(i,1) = 0;
+    else
+        iav(i,1) = 1;
+
+    end
+end
+
+% ---- conditions 3 & 4 ----
+
+% How do we define if a participants leave current room and enter into the same room
+
+
+% ---- identify CS type used in first room -------
+
+% Aim: extact the movement and the room number used in the first room
+% A trial in our VR environment involves at least 5 steps to complete the
+% task. And the typic avoidance and non-avoidance is recorded as following:
+
+
+%       Teleport        CStype
+%   'Start Trial'       'none'
+% 'Teleport_Room2_1'    'cs+'
+% 'Teleport_Room2_2'    'cs+'
+% 'Teleport_Room2_3'    'cs+'
+% 'Teleport_Room2_4'    'cs+'
+%    'placebook'        'cs+'
+
+%       Teleport        CStype
+%   'Start Trial'       'none'
+% 'Teleport_Room2_1'    'cs+'
+%   'Start Trial'       'none'
+% 'Teleport_Room1_1'    'cs-'
+% 'Teleport_Room1_2'    'cs-'
+% 'Teleport_Room1_3'    'cs-'
+% 'Teleport_Room1_4'    'cs-'
+%    'placebook'        'cs-'
+
+
+% To identify the cs type used in the first room, we employ the following
+% strategy:
+
+% 1. Check if the first value in the 'phase' column is equal to 'Start
+% Trial' and the second value is not equal to 'Start Trial'. If true, then
+% the second value represents the CS+ associated with the first room.
+
+% 2. If there is an error (e.g., two consecutive 'Start Trial' values),
+% then the third value is used instead.
+
+% 3. Double check for any error indices.
+
+% 4. Save the trial number, behavior (avoid/non-avoid), and CS type used in
+% the first room together in a new cell named 'savoid'.
+
+% 5. Identify if participants avoid the CS- in any trials. If yes, report
+% the trial number and subject numb
+
+for i  = 1:size(tn,1)
+
+    cst = sub1_behavior_phase2([sub1_behavior_phase2{:,3}] == i,12);     % coloum 12 = movment associated with cstype
+    roombeh = sub1_behavior_phase2([sub1_behavior_phase2{:,3}] == i,7);  % coloum 7 = ROOM (Room 1/ Room 2)
+
+    if strcmp(cst{1,1},inv) == 1 & strcmp(cst{2,1},inv) ~= 1
+
+        imov (i,1) = cst (2,1); %
+
+        % save type of room for the analysis of eye-tracking
+
+        iroomav (i,1) = roombeh (2,1);
+
+    elseif strcmp(cst{1,1},inv) == 1 & strcmp(cst{2,1}, inv) == 1
+
+        imov (i,1) = cst (3,1);
+        iroomav (i,1) = roombeh (3,1);
+
+
+    end
+
+end
+%%% check whether there is a wrong index (e.g., 'none')
+ckcsi = contains(inv,imov);
+
+if ckcsi ~= 0
+
+    disp(cksci,sn);
+end
+
+%%%%% save trials, behavior (avoid/non-avoid),cstype used in the first room
+%%%%% together in a new cell named 'savoid'
+
+for i = 1:size(tn,1)
+    
+    savoid {i,1} = tn(i);
+    savoid {i,2} = iav(i);
+    savoid {i,3} = imov{i};
+    savoid {i,4} = cspi;
+    savoid {i,5} = ix;
+
+end
+
+disp('avoidance')
+disp(savoid);
+
+% identify if a participants avoid cs- in some trials
+% report the trial number and subject number
+
+for i = 1:size(tn,1)
+
+    if isempty([savoid{i,2}] == 1 & contains(savoid(i,3), {'cs-'})) == 1
+        disp(i) % trial number
+        disp(ix) % subject number
+    end
+end
+
+%  -----------  save behavior data in to a personal file   ---------------
+
+%  A new personal file include cs positive, behavior data, and eye-tracking data
+
+
+% index the location of CS positive
+s(ix).csplus_location = cspi;
+
+% save savoid
+s(ix).Avoid_behavior.avoidance = savoid;
+
+
+% clear fcs ckcsi cst fcs  inv sub_avo
+% clear csi iav itr
+
+
+
+
+%%  -----------  Eye-tracking data  ---------------
+
+
+% ---- parameter for Eye data -----
+
+%%% < data preprocessing>
+
+% unify the name of AOIs
+
+upaoi = {['Bookcase Top Row'],['Empty Spot Top']};
+loaoi = {['Bookcase Bottom Row'],['Empty Spot Bottom']};
+
+% CS type
+mov = {['bending'],['stretching']};
+cstype = { {['bending'],['stretching']}};
+
+% create a new variable room
+room = [];
+
+% index the 1st and 2nd room
+
+irme = {['1st_room'],['2nd_room']}';
+
+% eye-blinking data.mat
+
+ppd = [];
+
+% index proportion of invalid data
+ivd = [];
+
+% index the subject whos the proporation of invalid data is more than 75%
+% ivdx, ivdy = coordinate
+
+% eye=-blinking data associated with movements
+emd = [];
+
+
+%%% < eye-tracking data -phase 1 >
+
+% save the variable name
+evl  = {''};
+% save number of trials
+trl = [];
+% set the starting time from 0.
+t0   = 0;
+% account the times of interval
+evn  = 0;
+
+%%%%%% save data in cells %%%%%
+evmat = {};
+
+% save the trial number for first fixation
+fftrialnam = [];
+
+% save the trial number for total fixation of cs-
+itcn = {};
+
+% save the trial number for total fixation of cs+
+itcp = {};
+
+% fixation
+fx = {};
+
+%%%%% index first fixation for each trial %%%%%
+iffd = {};
+
+% index of total fixation duration for cs-
+iti = {};
+
+% index of total fixation duration for cs+
+it = {};
+
+%%%%% total duration for cs- %%%%%
+tdcsn = {};
+%%%%% total duration for cs- %%%%%
+tdcsp = {};
+
+
+%%% < eye-tracking data -phase 2 >
+
+% itrial2 = index the trial number
+% ifcs2 = cstype
+% ifrm  = value saved in a room
+
+% save the variable name
+evl2  = {''};
+
+% save number of trials
+trl2 = [];
+
+% set the starting time from 0.
+t0   = 0;
+
+% account the times of interval
+evn  = 0;
+
+%%%%%% save data in cells %%%%%
+evmat2 = {};
+
+% save the trial number for first fixation
+fftrialnam2 = [];
+
+% index room
+rnn = [];
+
+% save the trial number for total fixation of cs-
+itcn2 = {};
+
+% save the trial number for total fixation of cs+
+itcp2 = {};
+
+% fixation
+fx2 = {};
+
+%%%%% index first fixation for each trial %%%%%
+iffd2 = {};
+
+%% --------- Step 5: data preprocessing (eye tracking) -------------
+
+% extract focus on AOIs (e.g., ['Bookcase Top Row Room 1'])
+foc = sub_eye(:,4);
+
+%  ---- 1. assign the type of room into a new variable -'room' -------
+
+foc (contains(foc,'none')) = {'Room 0'};   % rewrite the 'none' to 'Room 0'
+pat = lettersPattern(4)+" "+digitsPattern; % patten is identified as ' Room + digital number'
+room = extract(foc,pat);
+
+% ---- 2. unify AOIs name assign cstype to movement -------
+
+
+foc (contains(foc,loaoi)) = mov(1);
+foc (contains(foc,upaoi)) = mov(2);
+
+csmov = foc;
+
+% ---- 3. assigning the movement associated with each cs type -------
+
+% If the first movement in the 'mov' array ('stretching') matches the cs+ associated with the movement,
+% then the corresponding value in 'foc' is assigned as 'cs+'.
+% Conversely, if the second movement in 'mov' ('bending') matches the cs-, then the
+%  corresponding value in 'foc' is assigned as 'cs-.'; vice verse.
+
+if contains(mov(1),cspi) == 1
+    foc(contains(foc,mov(1))) = {'cs+'};
+    foc(contains(foc,mov(2))) = {'cs-'};
+
+elseif contains(mov(1),cspi) ~= 1
+
+    foc(contains(foc,mov(1))) = {'cs-'};
+    foc(contains(foc,mov(2))) = {'cs+'};
+
+end
+
+% ------- 4. create new variables of eye-tracking data -------------
+
+sub_eye(:,7) = foc;   % cs type assoicated with movement ('cs+'/'cs-')
+sub_eye(:,8) = room;  % room number (Room 0,Room 1,Room 2)
+sub_eye(:,4) = csmov; % movement ('bending'/'stretching')
+
+% -----  5. match the ROOM with cs+ trials used in avoidance - phase 2
+
+roomreplace = {};
+evn = 0;
+iroom = {};
+
+for i = 1:size(tn,1)
+
+    % phase2 index 
+    ip2 = find(strcmp(sub_eye(:,2),'phase2') == 1);
+
+    iroomeye =sub_eye(strcmp(sub_eye(:,2),'phase2') & [sub_eye{:,3}]' == i, 8);% roomname 
+
+    for ia = 1: size(iroomeye,1)
+
+        if contains(iroomeye(ia),{'Room 0'}) == 1 % Room 0 = do not enter into a room
+            iroomeye(ia,1) = {'Room 0'};
+        elseif contains(iroomeye(ia),iroomav(i)) == 1
+            iroomeye(ia,1) = irme(1);
+        else
+            iroomeye(ia,1) = irme(2);
+
+        end
+    end
+  
+
+    iroom(i,1) = {iroomeye};
+
+    for ia = 1: size(iroomeye,1)
+        evn = evn+1;
+        roomreplace(evn,1) = iroomeye(ia);
+    end
+
+end
+
+sub_eye(ip2,8) = roomreplace;
+
+
+% ---- 5. check the proportion of invalid data of pupil dilation -----
+
+% pupil dialtion is involved in left and right eyes respectively
+% The report of proportion of invalid data
+
+% data.frame for example
+
+% invaid data(left),    size,     propotion,
+
+%              -1	    2800	   0.0337
+% invalid data (right),  size,     propotion
+%               -1	    2283	   0.0275
+
+
+ppd = cell2mat(sub_eye(:,[5,6])); % index eye-blinling data associated with left and right eyes
+
+
+ivd(1,:)= reshape([-1,-1;sum(ppd == -1,1);sum(ppd ==-1,1)/size(ppd,1)],[1,6]);
+
+% index the subject whos the proporation of invalid data is more than 75%
+
+[ivdx,ivdy] = find(ivd(:,[3,6]) >= 0.75);
+
+%------ check the proporation of invalid eye-blinking associated of trial
+
+ivpcsp = [];
+ivpcsm = [];
+
+% phase 1 and phase 2 and remove 2nd_room
+
+emd = sub_eye(~contains(sub_eye(:,8),'2nd_room') & ~contains(sub_eye(:,2),'phase3'),:);
+
+% split phase 1 and phase 2 
+
+ eyemovment_phase1 = emd(contains(emd(:,2),'phase1'),:);
+ eyemovment_phase2 = emd(contains(emd(:,2),'phase2'),:);
+
+
+
+% ---- 5.1. check the proportion of invalid eye blinking data assoicated with movemnets -----
+
+% cs+ and cs- trials
+
+emdcsm = cell2mat(emd(contains(emd(:,7),ics(1)),[5,6])); % cs- trials 
+
+ivpcsm(1,:)= reshape([-1,-1;sum(emdcsm == -1,1);sum(emdcsm ==-1,1)/size(emdcsm,1)],[1,6]);
+
+propcsm(ix,:) = ivpcsm;
+
+emdcsp = cell2mat(emd(contains(emd(:,7),ics(2)),[5,6])); % cs+ trials 
+
+ivpcsp(1,:)= reshape([-1,-1;sum(emdcsp == -1,1);sum(emdcsp ==-1,1)/size(emdcsp,1)],[1,6]);
+
+propcsp(ix,:) = ivpcsp;
+
+% -------------- 5 check the proportion of invalid eye blinking data -----
+index_trial_phase1 = unique([eyemovment_phase1{:,3}]'); 
+
+for i = 1:size(index_trial_phase1)
+
+    eyemovment_phase1_trial= cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == index_trial_phase1(i),[5,6]));
+    ivpcsp(1,:)= reshape([-1,-1;sum(eyemovment_phase1_trial == -1,1);sum(eyemovment_phase1_trial ==-1,1)/size(eyemovment_phase1_trial,1)],[1,6]);
+    propotioneyeblink_phase1_trials (i,:) = ivpcsp;
+
+    
+    if propotioneyeblink_phase1_trials(i,3)>0.5
+        ev = ev + 1; 
+        remove_trial{ev,1} = ix;
+        remove_trial{ev,2} = i;
+        remove_trial{ev,3} = 'left';
+
+    elseif propotioneyeblink_phase1_trials(i,6)>0.5
+        ev = ev + 1; 
+        remove_trial{ev,1} = ix;
+        remove_trial{ev,2} = i;
+        remove_trial {ev,3} = 'right';
+    end 
+end 
+  propotioneyeblink_mean_phase1_trials(ix,:) = [mean(propotioneyeblink_phase1_trials(:,3)),mean(propotioneyeblink_phase1_trials(:,6))];
+
+  
+  
+  if propotioneyeblink_mean_phase1_trials(ix,1)>0.5 
+      eve = eve+1;
+      remove_participants{eve} = ix;
+
+  elseif propotioneyeblink_mean_phase1_trials(ix,2)>0.5
+      eve = eve+1;
+      remove_participants{eve} = ix;
+  end 
+ 
+% change all -1 data to NAN
+
+eyemovment_phase1([eyemovment_phase1{:,5}] == -1,5) = {0};
+eyemovment_phase1([eyemovment_phase1{:,6}] == -1,6) = {0};
+
+%% ---- plot the left and right pupil dilation ---------
+
+% all 
+fig = figure(1)
+
+%  x1 = cell2mat(eyemovment_phase1(2:end,1));
+% y1l = cell2mat(eyemovment_phase1(2:end,5));
+% y1r = cell2mat(eyemovment_phase1(2:end,6));
+
+ x1 = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 15,1));
+y1l = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 15,5));
+y1l_csp = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs+'})),5));
+x1l_csp = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs+'})),1));
+y1l_csm = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs-'})),5));
+x1l_csm = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs-'})),1));
+
+
+y1r = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 7, 6));
+y1r_csp = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs+'})),6));
+x1r_csp = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs+'})),1));
+y1r_csm = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs-'})),6));
+x1r_csm = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs-'})),1));
+
+% y1m = (y1l+y1r)/2;
+c1 = [0.9290 0.6940 0.1250];
+c2 = [0 0.4470 0.7410];
+ylim = [0 8];
+scatter(x1,y1l,'o','filled',ColorVariable=c1);
+hold on
+plot(x1,y1l,'Color',[0.827,0.827,0.827])
+scatter(x1,y1r,'o','filled',ColorVariable=c2)
+plot(x1,y1r,'Color',[0.827,0.827,0.827])
+% n = 2;
+% p = polyfit(x1, y1m, n);
+% y1m_fit = polyval(p, x1);
+% plot(x1,y1m_fit,'Color',[0.6350 0.0780 0.1840]);
+
+scatter(x1l_csp,y1l_csp,'o','filled','red')
+scatter(x1l_csm,y1l_csm,'o','filled','red')
+scatter(x1r_csp,y1r_csp,'o','filled','black')
+scatter(x1r_csm,y1r_csm,'o','filled','black')
+hold off
+ylab = ('pupil dilation(mm)');
+xlab = ('time series (ms)');
+
+file_name = strcat('sub',num2str(ix),'eye-tracking', '.png');
+frame = getframe(fig)
+imwrite (frame.cdata,file_name);
+
+
+%%
+
+
+% figure
+% t = tiledlayout(1,16,'TileSpacing','compact');
+% bgAx = axes(t,'XTick',[],'YTick',[],'Box','off');
+% 
+% % seperate the background into 16 sub-figures via Layout.TileSpan
+% bgAx.Layout.TileSpan = [1 16];
+% 
+% ax1 = axes(t);
+%  x1 = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 8,1));
+% y1l = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 8,5));
+% y1r = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 8, 6));
+% y1m = (y1l+y1r)/2;
+% scatter(ax1,x1,y1l,'o','filled',ColorVariable=c1);
+% hold on
+% plot(ax1,x1,y1l,'Color',[0.827,0.827,0.827])
+% scatter(ax1, x1,y1r,'o','filled',ColorVariable=c2)
+% plot(ax1,x1,y1r,'Color',[0.827,0.827,0.827])
+% n = 2;
+% p = polyfit(x1, y1m, n);
+% y1m_fit = polyval(p, x1);
+% plot(ax1,x1,y1m_fit,'Color',[0.6350 0.0780 0.1840]);
+% % hold off
+% xline(ax1,x1(end),':');
+% ax1.Box = 'off';
+% xlim(ax1,[x1(2),x1(end)])
+% xlabel(ax1,'Trial 1')
+% 
+% ax2 = axes(t);
+% ax2.Layout.Tile = 2;
+%  x2 = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 2,1));
+% y2l = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 2,5));
+% y2r = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 2,6));
+% y2m = (y1l+y1r)/2;
+
+% hold on
+% s2 = scatter(ax2,x2,y2r,'.','ColorVariable',"#0072BD")
+% s3 = scatter(ax2,x2,y2m,'x','ColorVariable','#A2142F')
+% xline(ax2,x2(end),':');
+% hold off
+% xline(ax2,x2(end),':');
+% ax2.YAxis.Visible = 'off';
+% ax2.Box = 'off';
+% xlim(ax2,[x2(1),x2(end)])
+% xlabel(ax2,'Trial2')
+% 
+% % Link the axes
+% linkaxes([ax1 ax2], 'y')
+
+
+% baseline correction
+% pupil dilation correction for subjects 
+% 输入数据（第一列是时间戳，第二列是测量值）
+% baseline correction = event start and end 
+% evn = 0;
+% evmat = {}; 
+% trial = {};
+% 
+% for i = 1 : size(itnTFF,1) 
+%    trial = sub1_eye_phase1([sub1_eye_phase1{:,3}]' == itnTFF(i),:)
+%     % 确定基线校正的起始和结束时间
+%     baseline_start_time = [trial{1,1}];
+%     baseline_end_time = [trial{90,1}];
+% end 
+% 
+% %% 从输入数据中提取时间戳和测量值
+% timestamps = [trial{:, 1}]';
+% measurements_left= [trial{:,5}]';
+% measurements_right= [trial{:,6}]';
+% 
+% 
+% %%
+% % index pupil dilations of baseline regarding to the starting and ending points 
+% 
+% baseline_start_index = find(timestamps == baseline_start_time);
+%   baseline_end_index = find(timestamps == baseline_end_time);
+% 
+% % mean 
+% baseline_mean_left = mean(measurements_left(baseline_start_index:baseline_end_index));
+baseline_mean_right = mean(measurements_right(baseline_start_index:baseline_end_index));
+ end 
+
