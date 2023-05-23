@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-05-23T17:55:13.807Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36" etag="xHVRY9ft8SEnl5uZvPs-" version="21.3.3" type="github">
+<mxfile host="app.diagrams.net" modified="2023-05-23T17:57:40.132Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36" etag="GhTgP6qUDT6ki3qMHGPT" version="21.3.3" type="github">
   <diagram name="第 1 页" id="VAMxYnleN22QML6oUBr0">
     <mxGraphModel dx="1783" dy="493" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -21,7 +21,7 @@
             <mxPoint x="350" y="600" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="BT4phYu5JlUOmxXtcWHX-5" value="&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;&lt;p style=&quot;text-align: left; line-height: 120%; font-size: 9px;&quot;&gt;Is the proportion of invalid&amp;nbsp;&lt;span style=&quot;background-color: initial;&quot;&gt;data over 50% in this trial?&lt;/span&gt;&lt;/p&gt;&lt;/blockquote&gt;" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;" parent="1" vertex="1">
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-5" value="&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;&lt;p style=&quot;text-align: left; line-height: 120%; font-size: 9px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;/blockquote&gt;" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;" parent="1" vertex="1">
           <mxGeometry x="275" y="460" width="150" height="90" as="geometry" />
         </mxCell>
         <mxCell id="BT4phYu5JlUOmxXtcWHX-8" value="Removing all data recored in the trial&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=9;" parent="1" vertex="1">
@@ -44,7 +44,7 @@
         <mxCell id="Rm1TB6uYPlrhV0x-yWxz-5" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=9;" edge="1" parent="1" source="BT4phYu5JlUOmxXtcWHX-16" target="Rm1TB6uYPlrhV0x-yWxz-4">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="BT4phYu5JlUOmxXtcWHX-16" value="&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;Does the person have more than 50%&amp;nbsp; invalid trials?&amp;nbsp;&lt;/blockquote&gt;" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;align=left;" parent="1" vertex="1">
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-16" value="&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;&lt;br&gt;&lt;/blockquote&gt;" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;align=left;" parent="1" vertex="1">
           <mxGeometry x="275" y="600" width="150" height="90" as="geometry" />
         </mxCell>
         <mxCell id="BT4phYu5JlUOmxXtcWHX-28" value="Cue spline interpolation to replace remaining missing data (-1)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=9;" parent="1" vertex="1">
@@ -80,7 +80,7 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="BT4phYu5JlUOmxXtcWHX-45" value="&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;font style=&quot;font-size: 9px;&quot;&gt;Does the trial contain 90 samples prior to the onset of a conditional stimulus?&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;/blockquote&gt;" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;align=left;" parent="1" vertex="1">
+        <mxCell id="BT4phYu5JlUOmxXtcWHX-45" value="&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;/blockquote&gt;" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;align=left;" parent="1" vertex="1">
           <mxGeometry x="275" y="1190" width="150" height="90" as="geometry" />
         </mxCell>
         <mxCell id="BT4phYu5JlUOmxXtcWHX-47" value="Remove the trial" style="whiteSpace=wrap;html=1;fontSize=9;" parent="1" vertex="1">
@@ -179,7 +179,7 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="Rm1TB6uYPlrhV0x-yWxz-34" value="Does the trial contains&amp;nbsp;&lt;br style=&quot;font-size: 9px;&quot;&gt;90 sample prior onset of a conditional stimulu" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;" vertex="1" parent="1">
+        <mxCell id="Rm1TB6uYPlrhV0x-yWxz-34" value="" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;" vertex="1" parent="1">
           <mxGeometry x="1102" y="1190" width="150" height="90" as="geometry" />
         </mxCell>
         <mxCell id="Rm1TB6uYPlrhV0x-yWxz-35" value="Remove the trial" style="whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
@@ -268,11 +268,29 @@
         <mxCell id="Rm1TB6uYPlrhV0x-yWxz-66" value="Average 90 samples prior&amp;nbsp; the first CS displayed" style="whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
           <mxGeometry x="290" y="1330" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="Rm1TB6uYPlrhV0x-yWxz-69" value="&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;&lt;p style=&quot;text-align: left; line-height: 120%; font-size: 9px;&quot;&gt;Is the proportion of invalid&amp;nbsp;&lt;span style=&quot;background-color: initial;&quot;&gt;data over 50% in this trial?&lt;/span&gt;&lt;/p&gt;&lt;/blockquote&gt;" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;" vertex="1" parent="1">
+        <mxCell id="Rm1TB6uYPlrhV0x-yWxz-69" value="&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;&lt;p style=&quot;text-align: left; line-height: 120%; font-size: 9px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;/blockquote&gt;" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;" vertex="1" parent="1">
           <mxGeometry x="1102" y="460" width="150" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="Rm1TB6uYPlrhV0x-yWxz-70" value="&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;Does the person have more than 50%&amp;nbsp; invalid trials?&amp;nbsp;&lt;/blockquote&gt;" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;align=left;" vertex="1" parent="1">
+        <mxCell id="Rm1TB6uYPlrhV0x-yWxz-70" value="&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;&lt;br&gt;&lt;/blockquote&gt;" style="html=1;whiteSpace=wrap;aspect=fixed;shape=isoRectangle;fontSize=9;align=left;" vertex="1" parent="1">
           <mxGeometry x="1102" y="600" width="150" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="Rm1TB6uYPlrhV0x-yWxz-71" value="Does the trial contain 90 samples prior to the onset of a conditional stimulus?" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="284" y="1220" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Rm1TB6uYPlrhV0x-yWxz-72" value="Does the trial contain 90 samples prior to the onset of a conditional stimulus?" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1112" y="1221" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Rm1TB6uYPlrhV0x-yWxz-73" value="Does the person have more than 50%&amp;nbsp; invalid trials?&amp;nbsp;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="285" y="630" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Rm1TB6uYPlrhV0x-yWxz-74" value="Is the proportion of invalid&amp;nbsp;&lt;span style=&quot;border-color: var(--border-color); font-size: 9px; text-align: left; background-color: initial;&quot;&gt;data over 50% in this trial?&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="284" y="490" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Rm1TB6uYPlrhV0x-yWxz-75" value="Is the proportion of invalid&amp;nbsp;&lt;span style=&quot;border-color: var(--border-color); font-size: 9px; text-align: left; background-color: initial;&quot;&gt;data over 50% in this trial?&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1117" y="490" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Rm1TB6uYPlrhV0x-yWxz-76" value="Does the person have more than 50%&amp;nbsp; invalid trials?&amp;nbsp;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1112" y="630" width="130" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
