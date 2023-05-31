@@ -758,7 +758,19 @@ end
 
 %%-------------- removing remaining eye-blinkings--------------------------
 
+ phase1_PD = eyemovment_phase1([eyemovment_phase1{:,9}] ~= -1,[1:4,7:9]); 
 
+ trial_number =  unique([phase1_PD{:,3}])';
+
+ % extract the pupil dilation associated with cs trials
+%%
+ cstrial = {};
+ for i = 1: size(trial_number,1)
+   cs_trial = sub1_behavior_phase1([sub1_behavior_phase1{:,3}] == i,12);
+   
+   cstrial(:,i) = {phase1_PD([phase1_PD{:,3}]' == trial_number(i) & strcmp(phase1_PD(:,5),cs_trial(3)),7)};
+
+ end 
 
 
 
