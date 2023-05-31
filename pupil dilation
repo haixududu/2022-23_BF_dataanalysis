@@ -1,4 +1,3 @@
-
 clear all
 clc
 
@@ -58,7 +57,10 @@ sn = size(avo,1);
 ev = 0;
 eve = 0;
 
- for ix = 13
+ev_cs = 0;
+eve_cs = 0;
+
+ for ix = 1
 
     % Uses the "fullfile" function to create a filename by combining the
     % directory path "bfp" and the "name" field of avoid
@@ -113,7 +115,7 @@ cspi = sub_avo{1,4};
 
 for i  = 1:size(sub_avo,1)
     % if the value in coloum 9 is equal to 'none' 'none' is saved in coloum
-    % 12
+    
     if  strcmp(sub_avo(i,9),'none') == 1
 
         sub_avo(i,12) = {['none']};
@@ -138,7 +140,7 @@ end
 % thus, we only save behaviror data of phase 2 (avoidance phase) and phase
 % 3 (exploration phase)
 
-
+ 
 % ----- parameters  ----
 
 % Phase name
@@ -196,7 +198,7 @@ iav = [];
 %%% < identify CStype >
 
 % index step in the hall
-inv = ['none'];
+inv = 'none';
 
 % cstype used in rooms
 cst = {};
@@ -346,8 +348,7 @@ for i = 1:size(tn,1)
 
 end
 
-disp('avoidance')
-disp(savoid);
+
 
 % identify if a participants avoid cs- in some trials
 % report the trial number and subject number
@@ -601,7 +602,7 @@ ivd(1,:)= reshape([-1,-1;sum(ppd == -1,1);sum(ppd ==-1,1)/size(ppd,1)],[1,6]);
 
 %------ check the proporation of invalid eye-blinking associated of trial
 
-ivpcsp = [];
+ivp = [];
 ivpcsm = [];
 
 % phase 1 and phase 2 and remove 2nd_room
@@ -627,18 +628,20 @@ propcsm(ix,:) = ivpcsm;
 
 emdcsp = cell2mat(emd(contains(emd(:,7),ics(2)),[5,6])); % cs+ trials 
 
-ivpcsp(1,:)= reshape([-1,-1;sum(emdcsp == -1,1);sum(emdcsp ==-1,1)/size(emdcsp,1)],[1,6]);
+ivp(1,:)= reshape([-1,-1;sum(emdcsp == -1,1);sum(emdcsp ==-1,1)/size(emdcsp,1)],[1,6]);
 
-propcsp(ix,:) = ivpcsp;
+propcsp(ix,:) = ivp;
 
 % -------------- 5 check the proportion of invalid eye blinking data -----
+
+
 index_trial_phase1 = unique([eyemovment_phase1{:,3}]'); 
 
 for i = 1:size(index_trial_phase1)
 
     eyemovment_phase1_trial= cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == index_trial_phase1(i),[5,6]));
-    ivpcsp(1,:)= reshape([-1,-1;sum(eyemovment_phase1_trial == -1,1);sum(eyemovment_phase1_trial ==-1,1)/size(eyemovment_phase1_trial,1)],[1,6]);
-    propotioneyeblink_phase1_trials (i,:) = ivpcsp;
+    ivp(1,:)= reshape([-1,-1;sum(eyemovment_phase1_trial == -1,1);sum(eyemovment_phase1_trial ==-1,1)/size(eyemovment_phase1_trial,1)],[1,6]);
+    propotioneyeblink_phase1_trials (i,:) = ivp;
 
     
     if propotioneyeblink_phase1_trials(i,3)>0.5
@@ -667,142 +670,97 @@ end
       remove_participants{eve} = ix;
   end 
  
-% change all -1 data to NAN
 
-eyemovment_phase1([eyemovment_phase1{:,5}] == -1,5) = {0};
-eyemovment_phase1([eyemovment_phase1{:,6}] == -1,6) = {0};
-
-%% ---- plot the left and right pupil dilation ---------
-
-% all 
-fig = figure(1)
-
-%  x1 = cell2mat(eyemovment_phase1(2:end,1));
-% y1l = cell2mat(eyemovment_phase1(2:end,5));
-% y1r = cell2mat(eyemovment_phase1(2:end,6));
-
- x1 = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 15,1));
-y1l = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 15,5));
-y1l_csp = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs+'})),5));
-x1l_csp = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs+'})),1));
-y1l_csm = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs-'})),5));
-x1l_csm = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs-'})),1));
+%% checking the blink associated with stimulus 
 
 
-y1r = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 7, 6));
-y1r_csp = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs+'})),6));
-x1r_csp = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs+'})),1));
-y1r_csm = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs-'})),6));
-x1r_csm = cell2mat(eyemovment_phase1(find([eyemovment_phase1{:,3}]' == 15 & strcmp(eyemovment_phase1(:,7),{'cs-'})),1));
+    for i = 1:size(index_trial_phase1)
+    
+    eyemovment_phase1_trial_cs = eyemovment_phase1([eyemovment_phase1{:,3}] == index_trial_phase1(i),:);
+    eyemovment_phase1_trial_cs = cell2mat(eyemovment_phase1_trial_cs(contains(eyemovment_phase1_trial_cs(:,7), ics),[5,6]));
+    
+    ivpcs(1,:)= reshape([-1,-1;sum(eyemovment_phase1_trial_cs== -1,1);sum(eyemovment_phase1_trial_cs ==-1,1)/size(eyemovment_phase1_trial_cs,1)],[1,6]);
+    propotioneyeblink_phase1_trials_cs (i,:) = ivpcs; 
 
-% y1m = (y1l+y1r)/2;
-c1 = [0.9290 0.6940 0.1250];
-c2 = [0 0.4470 0.7410];
-ylim = [0 8];
-scatter(x1,y1l,'o','filled',ColorVariable=c1);
-hold on
-plot(x1,y1l,'Color',[0.827,0.827,0.827])
-scatter(x1,y1r,'o','filled',ColorVariable=c2)
-plot(x1,y1r,'Color',[0.827,0.827,0.827])
-% n = 2;
-% p = polyfit(x1, y1m, n);
-% y1m_fit = polyval(p, x1);
-% plot(x1,y1m_fit,'Color',[0.6350 0.0780 0.1840]);
+    
+    if propotioneyeblink_phase1_trials(i,3)>0.5
+        ev_cs = ev_cs + 1; 
+        remove_trial_cs {ev,1} = ix;
+        remove_trial_cs {ev,2} = i;
+        remove_trial_cs {ev,3} = 'left';
 
-scatter(x1l_csp,y1l_csp,'o','filled','red')
-scatter(x1l_csm,y1l_csm,'o','filled','red')
-scatter(x1r_csp,y1r_csp,'o','filled','black')
-scatter(x1r_csm,y1r_csm,'o','filled','black')
-hold off
-ylab = ('pupil dilation(mm)');
-xlab = ('time series (ms)');
-
-file_name = strcat('sub',num2str(ix),'eye-tracking', '.png');
-frame = getframe(fig)
-imwrite (frame.cdata,file_name);
+    elseif propotioneyeblink_phase1_trials_cs(i,6)>0.5
+        ev_cs = ev_cs + 1; 
+        remove_trial_cs {ev,1} = ix;
+        remove_trial_cs {ev,2} = i;
+        remove_trial_cs {ev,3} = 'right';
+    end 
+end 
+  propotioneyeblink_mean_phase1_trials_cs(ix,:) = [mean(propotioneyeblink_phase1_trials_cs(:,3)),...
+      mean(propotioneyeblink_phase1_trials_cs(:,6))];
 
 
-%%
+ if propotioneyeblink_mean_phase1_trials_cs(ix,1)>0.5 
+      eve_cs = eve_cs+1;
+      remove_participants_cs{eve_cs} = ix;
+
+  elseif propotioneyeblink_mean_phase1_trials_cs(ix,2)>0.5
+      eve_cs = eve_cs +1 ;
+      remove_participants_cs{eve_cs} = ix;
+  end 
+ 
+%% ----------------- coded the data within 100ms before onset and after the offset of blinks as -1------------------
+
+eyemovment_phase1_csminus = eyemovment_phase1(strcmp(eyemovment_phase1(:,7),ics(1)),:);
+eyemovment_phase1_csplus = eyemovment_phase1(strcmp(eyemovment_phase1(:,7),ics(2)),:);
+
+    left  = find([eyemovment_phase1{:,5}] == -1)';
+    right = find([eyemovment_phase1{:,6}] == -1)';
+    
+    for i = 1:size(left,1)
+    
+    artifacts_left(i,:) = [left(i)-9:left(i)+9]';
+
+    end 
+    
+    artifacts_left = unique(artifacts_left(:));
+    
+    for i = 1:size(right,1)
+    
+    artifacts_right(i,:) = [right(i)-9:right(i)+9]';
+
+    end 
+    
+    artifacts_right = unique(artifacts_right(:));
+    
+for i = 1:size(artifacts_left,1)
+    eyemovment_phase1{artifacts_left(i),5} = -1;
+end
+
+for i = 1:size(artifacts_right,1)
+    eyemovment_phase1{artifacts_right(i),6} = -1;
+end
 
 
-% figure
-% t = tiledlayout(1,16,'TileSpacing','compact');
-% bgAx = axes(t,'XTick',[],'YTick',[],'Box','off');
-% 
-% % seperate the background into 16 sub-figures via Layout.TileSpan
-% bgAx.Layout.TileSpan = [1 16];
-% 
-% ax1 = axes(t);
-%  x1 = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 8,1));
-% y1l = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 8,5));
-% y1r = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 8, 6));
-% y1m = (y1l+y1r)/2;
-% scatter(ax1,x1,y1l,'o','filled',ColorVariable=c1);
-% hold on
-% plot(ax1,x1,y1l,'Color',[0.827,0.827,0.827])
-% scatter(ax1, x1,y1r,'o','filled',ColorVariable=c2)
-% plot(ax1,x1,y1r,'Color',[0.827,0.827,0.827])
-% n = 2;
-% p = polyfit(x1, y1m, n);
-% y1m_fit = polyval(p, x1);
-% plot(ax1,x1,y1m_fit,'Color',[0.6350 0.0780 0.1840]);
-% % hold off
-% xline(ax1,x1(end),':');
-% ax1.Box = 'off';
-% xlim(ax1,[x1(2),x1(end)])
-% xlabel(ax1,'Trial 1')
-% 
-% ax2 = axes(t);
-% ax2.Layout.Tile = 2;
-%  x2 = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 2,1));
-% y2l = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 2,5));
-% y2r = cell2mat(eyemovment_phase1([eyemovment_phase1{:,3}] == 2,6));
-% y2m = (y1l+y1r)/2;
+for i = 1:size(artifacts_left,1)
+    eyemovment_phase1{artifacts_left(i),5} = eyemovment_phase1{artifacts_left(i),6};
+end 
 
-% hold on
-% s2 = scatter(ax2,x2,y2r,'.','ColorVariable',"#0072BD")
-% s3 = scatter(ax2,x2,y2m,'x','ColorVariable','#A2142F')
-% xline(ax2,x2(end),':');
-% hold off
-% xline(ax2,x2(end),':');
-% ax2.YAxis.Visible = 'off';
-% ax2.Box = 'off';
-% xlim(ax2,[x2(1),x2(end)])
-% xlabel(ax2,'Trial2')
-% 
-% % Link the axes
-% linkaxes([ax1 ax2], 'y')
+for i = 1:size(artifacts_right,1)
+    eyemovment_phase1{artifacts_right(i),6} = eyemovment_phase1{artifacts_right(i),5};
+end 
 
-
-% baseline correction
-% pupil dilation correction for subjects 
-% 输入数据（第一列是时间戳，第二列是测量值）
-% baseline correction = event start and end 
-% evn = 0;
-% evmat = {}; 
-% trial = {};
-% 
-% for i = 1 : size(itnTFF,1) 
-%    trial = sub1_eye_phase1([sub1_eye_phase1{:,3}]' == itnTFF(i),:)
-%     % 确定基线校正的起始和结束时间
-%     baseline_start_time = [trial{1,1}];
-%     baseline_end_time = [trial{90,1}];
-% end 
-% 
-% %% 从输入数据中提取时间戳和测量值
-% timestamps = [trial{:, 1}]';
-% measurements_left= [trial{:,5}]';
-% measurements_right= [trial{:,6}]';
-% 
-% 
-% %%
-% % index pupil dilations of baseline regarding to the starting and ending points 
-% 
-% baseline_start_index = find(timestamps == baseline_start_time);
-%   baseline_end_index = find(timestamps == baseline_end_time);
-% 
-% % mean 
-% baseline_mean_left = mean(measurements_left(baseline_start_index:baseline_end_index));
-baseline_mean_right = mean(measurements_right(baseline_start_index:baseline_end_index));
+%% average 
+ for i = 1: size(eyemovment_phase1,1)
+ eyemovment_phase1(i,9) = {([eyemovment_phase1{i,6}]'+ [eyemovment_phase1{i,5}]')/2};
  end 
+
+
+%%-------------- removing remaining eye-blinkings--------------------------
+
+
+
+
+
+
 
