@@ -1342,17 +1342,24 @@ end
     % clear tdcsp iti it tdcsn tcsn itcp itcpt itcp itcn itcnt
 
 
+    %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %
+    % avoidance phase
+    %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%     %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     %
-%     % avoidance phase
-%     %
-%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    %% --------- 1. identify proposition of eye-blinking  ---------------------
 
-     for i = 1:size(index_trialnum_ph2,1)
+    % --------- 1.1 propotion of cstype in left and right --------------------
 
-        phase2_trial= cell2mat(sub1_eye_phase2([sub1_eye_phase2{:,3}] == index_trialnum_ph2(i),[5,6]));
+indextn2 = index_trialnum_ph2;
+    
+   for ix = 1:60
+    
+    for i = 1:size(indextn2,1)
+
+        phase2_trial= cell2mat(sub1_eye_phase2([sub1_eye_phase2{:,3}] == indextn2(i),[5,6]));
         ivp(1,:)= reshape([-1,-1;sum(phase2_trial == -1,1);sum(phase2_trial ==-1,1)/size(phase2_trial,1)],[1,6]);
         propotioneyeblink_phase2_trials (i,:) = ivp;
 
@@ -1407,10 +1414,16 @@ end
     right = find([sub1_eye_phase2{:,6}] == -1)';
 
 
-
-
   for i = 1:size(left,1)
 
+        % left(i) -9 >= 1; left(i) + 9 <= size(sub1_eye_phase2,) (out of
+        % the minimum size) x
+
+        % left(i) - 9 >= 1;left (i) + 9 >= size(sub1_eye_phase2,1) (out of
+        % the maximum size ) x
+
+        % left(i) - 9 <= 1;left (i) + 9 <= size(sub1_eye_phase2,1) (with
+        % the 1: size(phase1) v
 
         if left(i) -9 <= 1 & left(i) + 9 <= size(sub1_eye_phase2,1)
 
@@ -1467,6 +1480,10 @@ end
         sub1_eye_phase2{artifacts_right(i),6} = sub1_eye_phase2{artifacts_right(i),5};
     end
 
+
+
+    sub1_eye_phase2 = sub1_eye_phase2(~contains(sub1_eye_phase2(:,8),'2nd_room'),:);
+
     % --------- 2.2  average pupil dilation of left and right side -----------
 
     for i = 1: size(sub1_eye_phase2,1)
@@ -1475,19 +1492,21 @@ end
 
     phase2_PD = sub1_eye_phase2([sub1_eye_phase2{:,9}] ~= -1,[1:4,7,9]);
 
+ 
 
 
 
+    %% ----------------- 3. interpolation -------------------------------
 
-%     %% ----------------- 3. interpolation -------------------------------
 
-   sub1_eye_phase2_corrected= {};
     evn1 = 0;
-    for i = 1: size(index_trialnum_ph2)
-        sub1_trial={};
+    sub1_eye_phase2_corrected= {};
+    
+    for i = 1: size(indextn2)
+        sub1_trial=[];
         locblink = [];
-        sub1_trial = sub1_eye_phase2([sub1_eye_phase2{:, 3}] == index_trialnum_ph2(i), :);
-        locblink(:,1) = find([sub1_trial{:, 9}] == -1)';
+        sub1_trial = sub1_eye_phase2([sub1_eye_phase2{:, 3}] == indextn2(i), :);
+        locblink(:, 1) = find([sub1_trial{:, 9}] == -1);
         evn = 1;
         start_blink = [];
         end_blink = [];
@@ -1502,13 +1521,13 @@ end
             % identify the time windows
             if ii == size(locblink, 1)
                 start_blink(1, 1) = locblink(1); % identify the first eye-blink
-                end_blink(1,1) = locblink(end);   % identify the last eye-blink
+                end_blink(1, 1) = locblink(end);   % identify the last eye-blink
 
 
             elseif locblink(ii + 1) - locblink(ii) > 9 % two time windows were identifyied that there was a gap with 9 timestampes (100ms)
                 evn = evn + 1;
-                start_blink(evn,1) = locblink(ii + 1);
-                end_blink(evn,1) = locblink(ii);
+                start_blink(evn, 1) = locblink(ii + 1);
+                end_blink(evn, 1) = locblink(ii);
             end
 
         end
@@ -1528,6 +1547,12 @@ end
 
                 % if there is no t1 ｜t4 delete the blinks
                 sub1_trial((start_blink(iii)+1):(end_blink(iii)-1),:) = {[]};
+
+                  % Create a logical index to identify non-empty rows
+                  nonemptyrows = ~any(cellfun(@isempty, sub1_trial), 2);
+
+                  % Select non-empty rows
+                  sub1_trial = sub1_trial(nonemptyrows, :);
 
 
             else
@@ -1551,20 +1576,19 @@ end
 
                 % if there is no invaild reference
 
-                if ([sub1_trial{t4_location,9}] == -1) & ([sub1_trial{size(sub1_trial,1):t4_location,9}] ~= -1) 
+                if ([sub1_trial{t4_location,9}] == -1) & ([sub1_trial{size(sub1_trial,1):t4_location,9}] ~= -1)
                      t4  = [sub1_trial{find(([sub1_trial{:, 1}] > [sub1_trial{t4_location, 1}]) & ([sub1_trial{:, 9}] ~= -1), 1, 'first'),1}];
 
                      t4_location = find([sub1_trial{:,1}] == t4);
 
-
-
-                elseif [sub1_trial{size(sub1_trial,1):t4_location,9}] == -1 | t4_location > length(sub1_trial)
+                elseif [sub1_trial{size(sub1_trial,1):t4_location,9}] == -1
                         sub1_trial((start_blink(iii)+1):(end_blink(iii)-1),:) = {[]};
 
+                        % Create a logical index to identify non-empty rows
+                        nonemptyrows = ~any(cellfun(@isempty, sub1_trial), 2);
 
-
-
-                 continue 
+                        % Select non-empty rows
+                        sub1_trial = sub1_trial(nonemptyrows, :);
 
                 else
                     t4  = [sub1_trial{t4_location,1}];
@@ -1580,7 +1604,7 @@ end
                 D_point = [sub1_trial{t4_location,9}];
 
                 pupilsize = [A_point,B_point,C_point,D_point];
-
+   
                 % Generate the cubic spline interpolation
 
                 interpolate_range =  linspace(t2,t3,length(start_blink(iii):1:end_blink(iii)));
@@ -1593,24 +1617,20 @@ end
             end
         end
 
-                        % Create a logical index to identify non-empty rows
-                        nonemptyrows = ~any(cellfun(@isempty, sub1_trial), 2);
 
-                        % Select non-empty rows
-                        sub1_trial = sub1_trial(nonemptyrows, :);
 
 
         %----------------- baseline correction -----------------
 
-
+sub1_eye_phase2_corrected = {};
 
 %   identify the baseline correction
 
         pat = 'Teleport_Room'+ digitsPattern(1)+'_1' ;
         % extract the timestamp for the first step of entering the room
         % if there is two " teleport 1" select the first 1
-        index_opendoor = sub1_behavior_phase2{find([sub1_behavior_phase2{:,3}]' == index_trialnum_ph2(i) & contains(sub1_behavior_phase2(:,8),pat),1,'first'),1};
-        % identify 200ms timestampes before open the door
+        index_opendoor = sub1_behavior_phase2{find([sub1_behavior_phase2{:,3}]' == indextn2(i) & contains(sub1_behavior_phase2(:,8),pat),1,'first'),1};
+        % identify 90 timestampes before open the door
          % if there is no 90 timestampes then deletthe trial 
         if (find([sub1_trial{:,1}] < index_opendoor,1,'last') - 19) <= 0
             evn1 = evn1 +1;
@@ -1651,6 +1671,12 @@ sub1_eye_phase2_corrected = sub1_eye_phase2_corrected(nonEmptyRows,:);
 
 
 
+
+
+
+
+
+
     %% --------- 4. pupil dilation -------------------
 
     % cs_trial and trials 
@@ -1665,7 +1691,7 @@ sub1_eye_phase2_corrected = sub1_eye_phase2_corrected(nonEmptyRows,:);
 
     for i = 1: size(indextn2_corrected,1)
 
-        Phase2_PD = sub1_eye_phase2_corrected([sub1_eye_phase2_corrected{:,3}] == indextn2_corrected(i),:);
+        Phase2_PD = sub1_eye_phase1_corrected([sub1_eye_phase1_corrected{:,3}] == indextn2_corrected(i),:);
 
         cstrial = sub1_behavior_phase2([sub1_behavior_phase2{:,3}]' == indextn2_corrected(i)...
             & contains(sub1_behavior_phase2(:,8),pat),12);
@@ -1685,7 +1711,7 @@ sub1_eye_phase2_corrected = sub1_eye_phase2_corrected(nonEmptyRows,:);
         evmat(evn,7) = {PD_csm};
     end
 
-
+  
     s(ix).Avoid_fixation.pupil_cstrial = evmat;
 
 
@@ -1735,23 +1761,25 @@ sub1_eye_phase2_corrected = sub1_eye_phase2_corrected(nonEmptyRows,:);
 
     % -------- group timestamps with a same name --------
 
+    sub1_eye_phase2([sub1_eye_phase2{:,9}] == -1,[4,7]) = {'Room 0'};
 
+    cstrail = [];
     evn = 0;
 
     fx = {};
 
-    for i = 1:size (sub1_eye_phase2_corrected,1)
+    for i = 1:size (sub1_eye_phase2,1)
 
         % index trial number
-        itrial2 = sub1_eye_phase2_corrected{i,3};
+        itrial2 = sub1_eye_phase2{i,3};
 
         % index fixation on cstype
-        ifcs2 = sub1_eye_phase2_corrected (i,7);
+        ifcs2 = sub1_eye_phase2 (i,7);
 
         % create a new cell with
 
         if i > 1
-            t1 =  sub1_eye_phase2_corrected{i-1,1};
+            t1 =  sub1_eye_phase2{i-1,1};
         else
             t1=t0;
         end
@@ -1762,25 +1790,15 @@ sub1_eye_phase2_corrected = sub1_eye_phase2_corrected(nonEmptyRows,:);
             evn = evn+1;
 
 
-            evmat2 {evn,1}  = trl2;       % trial number
-            evmat2 {evn,2}  = evl2{1};    % cs type
-            evmat2 {evn,3}  = [t0, t1];   % duration with starting and ending time
-            evmat2 {evn,4}  = t1-t0+0.011;  % duration of fixation
-            evmat2 {evn,5}  = t0;
+            evmat2 {evn, 1}  = trl2;       % trial number
+            evmat2 {evn, 2}  = evl2{1};    % cs type
+            evmat2 {evn, 3}  = [t0, t1];   % duration with starting and ending time
+            evmat2 {evn, 4}  = t1-t0+0.011;  % duration of fixation
+            evmat2 {evn, 5}  = t0;
 
-            t0  = sub1_eye_phase2_corrected{i,1};
+            t0  = sub1_eye_phase2{i,1};
             evl2 = ifcs2;
             trl2 = itrial2;
-        end
-
-        if i == size(sub1_eye_phase2_corrected, 1) && ~isempty(evl2) && strcmp(ifcs2(1), evl2(1))
-            evn = evn + 1;
-
-            evmat2{evn, 1} = trl2;                    % trial number
-            evmat2{evn, 2} = evl2{1};                 % cs type
-            evmat2{evn, 3} = [t0, t1];               % duration with starting and ending time
-            evmat2{evn, 4} = t1 - t0 + 0.011;        % duration of fixation
-            evmat2{evn, 5} = t0;
         end
     end
 
@@ -1794,10 +1812,10 @@ sub1_eye_phase2_corrected = sub1_eye_phase2_corrected(nonEmptyRows,:);
 
     % identify the trial number of eye - tracking data used in phase 1
 
-    isp2 = sub1_eye_phase2_corrected;
+    isp2 = sub1_eye_phase2;
 
     % index the trial number
-    p2itnTFF = unique([sub1_eye_phase2_corrected{:,3}]');
+    p2itnTFF = unique([sub1_eye_phase2{:,3}]');
 
     % define array patten of the first step for the procedure of entering the room
 
@@ -1849,7 +1867,7 @@ sub1_eye_phase2_corrected = sub1_eye_phase2_corrected(nonEmptyRows,:);
         p2iPFF = fx(find([fx{:,1}]' == p2itnTFF(i) ...
             & (strcmp(fx(:,2),index_cstype(2))|strcmp(fx(:,2),index_cstype(1))),1,'first'),[1,2]);
 
-        if contains(p2iPFF(:,2),{'cs+'}) == 1
+        if contains(p2iPFF(:,2),cstrial) == 1
             test = 1;
         else
             test = 0;
@@ -1901,7 +1919,9 @@ sub1_eye_phase2_corrected = sub1_eye_phase2_corrected(nonEmptyRows,:);
 
         cstrial  = savoid([savoid{:,2}] == p2itnTFF(i),4);
         it = evmat2([evmat2{:,1}]' == p2itnTFF(i) ...
-            & strcmp(evmat2(:,2), index_cstype(2)),:); % ics(2) = cs+ 
+            & strcmp(evmat2(:,2), index_cstype(2)),:); % ics(2) = cs+
+
+
         iti = evmat2([evmat2{:,1}]' == p2itnTFF(i) ...
             &  strcmp(evmat2(:,2), index_cstype(1)),:); %ics(1) = cs-
 
@@ -1945,12 +1965,9 @@ sub1_eye_phase2_corrected = sub1_eye_phase2_corrected(nonEmptyRows,:);
 
 
 
-end
 
-save 0620
+    end
 
-
-% write in a table 
 
 %% remove participants and trials
 
@@ -1966,20 +1983,257 @@ save 0620
   % avoidance: cs pupil dilation, time to first fixation, total fixation
   % and probability and avoidance.
 
-evn1 = 0;
-evn2 = 0;
+
+
+
+ 
+%% ---------- step 12: create tables for each variable  ----------------
+
 
 list1 = {}; % all data of avoidance
 
 list2 = {}; % all data of Pavlov_fixation.timetoFixfixation
+
+list3 = {}; % all data of Pavlov_fixation.totalfixation  
+
+list4 = {}; % all data of Avoid_fixation.timetoFixfixationr1
+
+list5 = {}; % all data of Avoid_fixation.totalfixationr1 
+
+list6 = {}; % all data of Pavlov_fixation.pupildilation
+
+list7 = {}; % all data of Avoid_fixation.pupildilation
+
+
+evn1 = 0;
+evn2 = 0;
+evn3 = 0;
+evn4 = 0;
+evn5 = 0;
+evn6 = 0;
+evn7 = 0;
+
 for ix = 1:size(s,2)
-for i = 1:size(s(ix).Pavlov_fixation.timetoFixfixation,1)
+
+for i = 1:size(s(ix).Avoid_behavior.avoidance,1)
     evn1 = evn1+1;
-    list1(evn1,1: 5) = s(ix).Pavlov_fixation.timetoFixfixation(i,:);
-    list1(evn1,6) =  s(ix).Pavlov_fixation.timetoFixfixation(i,:);
+    list1(evn1,:) = s(ix).Avoid_behavior.avoidance(i,:);
+end
+
+for i = 1:size(s(ix).Pavlov_fixation.timetoFixfixation,1)
+     evn2 = evn2+1;
+     list2(evn2,:) = s(ix).Pavlov_fixation.timetoFixfixation(i,:);
+end
+
+for i = 1:size(s(ix).Pavlov_fixation.totalfixation,1)
+     evn3 = evn3+1;
+     list3(evn3,:) = s(ix).Pavlov_fixation.totalfixation(i,:);
+end
+
+for i = 1:size(s(ix).Avoid_fixation.timetoFixfixationr1,1)
+     evn4 = evn4+1;
+     list4(evn4,:) = s(ix).Avoid_fixation.timetoFixfixationr1(i,:);
+end
+
+for i = 1:size(s(ix).Avoid_fixation.totalfixationr1,1)
+     evn5 = evn5+1;
+     list5(evn5,:) = s(ix).Avoid_fixation.totalfixationr1(i,:);
 
 end
+
+for i = 1:size(s(ix).Pavlov_fixation.pupil_cstrial,1)
+     evn6 = evn6+1;
+     list6(evn6,:) = s(ix).Pavlov_fixation.pupil_cstrial(i,:);
+
 end 
+
+for i = 1:size(s(ix).Avoid_fixation.pupil_cstrial,1)
+     evn7 = evn7+1;
+     list7(evn7,:) = s(ix).Avoid_fixation.pupil_cstrial(i,:);
+end 
+
+
+end 
+
+
+for i = 1: size(remove_trial,1)
+
+    % list 4 list 5 list 7
+
+
+   % for further analysis
+   % if the remove_trial has phase1 than add conditions to remove the
+   % trial for pavlovian and avoidance seperately
+
+  list4(ismember([list4{:,1}],[remove_trial{i,1}]) & ismember([list4{:,2}],[remove_trial{i,2}]),:) = [];
+  list5(ismember([list5{:,1}],[remove_trial{i,1}]) & ismember([list5{:,4}],[remove_trial{i,2}]),:) = [];
+  list7(ismember([list7{:,1}],[remove_trial{i,1}]) & ismember([list7{:,2}],[remove_trial{i,2}]),:) = [];
+
+end 
+%%
+% -------------------- step 13: output xlsx ------------------
+% 
+% all data of avoidance
+    tn1 = {
+     ['Subject_id'],...
+     ['trial_number'],...
+     ['cs+_location'],...
+     ['cstype'],...
+     ['avoidance']};
+
+avoid = table(...
+    list1(:,1), ...
+    list1(:,2), ...
+    list1(:,3), ...
+    list1(:,4), ...
+    list1(:,5), ...
+    'VariableNames',tn1);
+
+writetable(avoid, ...
+   ['Avoid_probabilityofavoidance.xlsx']);
+
+% all data of Pavlov_fixation.timetoFixfixation
+
+    tn2 = {['Subject_id'],...
+     ['trial_number'],...
+     ['cs+_location'],...
+     ['cstrial'],...
+     ['probabilityfirstfixation'],...
+     ['cs+'],...
+     ['timetofirstfixation_cs+'],...
+     ['cs-'],...
+     ['timetofirstfixation_cs-']
+     };
+
+ttffp1 = table(...
+     list2(:,1), ...
+     list2(:,2), ...
+     list2(:,3), ...
+     list2(:,4), ...
+     list2(:,5), ...
+     list2(:,6), ...
+     list2(:,7), ...
+     list2(:,8), ...
+     list2(:,9), ...
+     'VariableNames',tn2);
+
+writetable(ttffp1, ...
+     ['Pavlov_firstfixation.xlsx']);
+
+
+% all data of Pavlov_fixation.totalfixation  
+    tn3 = {
+     ['Subject_id'],...
+     ['trial_number'],...
+     ['cs+_location'],...
+     ['cstrial'],...
+     ['cs+'],...
+     ['totalfixation_cs+'],...
+     ['cs-'],...
+     ['totalfixation_cs-']};
+
+totalp1 = table(...
+     list3(:,1), ...
+     list3(:,4), ...
+     list3(:,2), ...
+     list3(:,3), ...
+     list3(:,5), ...
+     list3(:,6), ...
+     list3(:,7), ...
+     list3(:,8), ...
+     'VariableNames',tn3);
+
+writetable(totalp1, ...
+     ['Pavlov_totalfixation.xlsx']);
+
+% all data of Avoid_fixation.timetoFixfixation
+%%
+    tn4 = {
+     ['Subject_id'],...
+     ['trial_number'],...
+     ['cs+_location'],...
+     ['cstrial'],...
+     ['probabilityoffirstfixation']....
+     ['cs+'],...
+     ['timetofirstfixation_cs+'],...
+     ['cs-'],...
+     ['timetofirstfixation_cs-']
+     };
+
+
+ttffa2 = table(...
+     list4(:,1), ...
+     list4(:,2), ...
+     list4(:,3), ...
+     list4(:,4), ...
+     list4(:,5), ...
+     list4(:,6), ...
+     list4(:,7), ...
+     list4(:,8), ...
+     list4(:,9), ...
+     'VariableNames',tn4);
+
+     writetable(ttffa2, ...
+     ['Avoid_firstfixation.xls']);
+%%
+
+%  all data of Avoid_fixation.totalfixation
+     tn5 = {
+     ['Subject_id'],...
+     ['trial_number'],...
+     ['cs+_location'],...
+     ['cstrial'],...
+     ['cs+'],...
+     ['totalfixation_cs+'],...
+     ['cs-'],...
+     ['totalfixation_cs-']};
+
+totala2 = table(...
+     list5(:,1), ...
+     list5(:,4), ...
+     list5(:,2), ...
+     list5(:,3), ...
+     list5(:,5), ...
+     list5(:,6), ...
+     list5(:,7), ...
+     list5(:,8), ...
+     'VariableNames',tn5);
+
+
+writetable(totala2, ...
+     ['Avoid_totalfixation.xls']);
+
+  % all data of Pavlov_fixation.pupildilation
+     tn7 = {
+     ['Subject_id'],...
+     ['trial_number'],...
+     ['cstrial'],...
+     ['pupildilation_mean']};
+
+pavlov_pupil = table(...
+     list6(:,1), ...
+     list6(:,2), ...
+     list6(:,3), ...
+     list6(:,4), ...
+     'VariableNames',tn7);
+
+writetable(pavlov_pupil , ...
+     ['Pavlovian_fearofpain_pupil.xlsx']);
+
+Avoid_pupil = table(...
+     list7(:,1), ...
+     list7(:,2), ...
+     list7(:,3), ...
+     list7(:,4), ...
+     'VariableNames',tn7);
+
+writetable(Avoid_pupil , ...
+     ['Avoid_fearofpain_pupil.xlsx']);
+
+
+save 0425_mat_fearofpain
+
+
 
 
 
