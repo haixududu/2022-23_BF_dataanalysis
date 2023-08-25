@@ -1,0 +1,1985 @@
+clear all
+clc
+
+tic
+
+%%----------------------------- data preprocessing ------------------------
+
+% ------- note ------
+% This script aims to build an structure includes personal traits,
+% data for manipulation checking and data for main data analysis for each
+% participants
+
+% data structure (take the first participant as an example)
+
+% sub1.csplus_location = 'stretching'
+
+% sub1.personaltriats.
+
+
+% sub1.Pavlov_fixation.
+% firstfixation &
+% totalfixation
+% pupildilation
+
+% sub1.Avoid_fixation.
+% firstfixation
+% totalfirxation
+% pupildilation
+
+
+% sub1.Avoid_behavior.
+% avoidance
+
+%%% Please read the 'readme' file for instructions on how to execute the script for  each step.
+
+%%% Please read the 'readme' file for instructions on how to execute the script for each step.
+
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% preprocessing data
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% --------- 1. read data and unify the name of AOIs for further analysis  ------------
+
+% Aim: Assigns the path to the directory containing the data to a
+% variable named 'bfp'
+bfp = 'BF_DATA';
+
+% Obtain a list of files in the
+% directory whose filenames start with 'BeyondFear_1', and assigns the
+% resulting structure array to a variable named 'avo', which save the data in a structure.
+ avo = dir(fullfile('BF_DATA/BeyondFear_1*'));
+
+
+% obtain a list of files in the
+% directory whose filenames start with 'BeyondFear_EYE_', and assigns the
+% resulting structure array to a variable named 'eyd'.
+eyd = dir(fullfile('BF_DATA/BeyondFear_EYE_*'));
+
+% subject numbr
+
+sn = size(avo,1);
+
+% subject number for testing
+
+ev = 0;
+eve = 0;
+
+for ix =1:sn
+
+    % Uses the "fullfile" function to create a filename by combining the
+    % directory path "bfp" and the "name" field of avoid
+
+    filnam = fullfile(bfp,avo(ix).name);
+    fav = readtable(filnam);
+
+    % for further analysis, the data is save as cell
+    sub_avo = table2cell(fav);
+
+    % save eye-tracking data into cell
+    edname = fullfile(bfp,eyd(ix).name);
+    eyt = readtable(edname);
+    sub_eye = table2cell(eyt);
+
+
+
+    % clear filnam edname bfp fav
+    % clear  eyd eyt
+
+    % ---- 2. identify the movment associated with CS type --------
+
+
+    % Aim: assign the cs type to the movemnets in a new array (couloum 12)
+    % Stratgy:
+
+    %  1. identify the cs positive which is saved in coloum 4
+
+    %  2. extract movemnet data from coloun 9 which is contained three type of
+    %  value ('none', 'bending', 'stretching')
+
+    %  3. assign the cstype to the movements (bending and stretching) into new
+    %  array (movments associated with cstype)
+    % a.if the value in coloum 9 is equal to 'none' 'none' is saved in coloum 12
+    % b. if the value in coloum 9 is equal to the value saved in cspi, 'cs+' is saved in coloum 12
+    % c. other value is saved in colloum 12 as 'cs-'
+
+
+    % data.frame for example
+
+    % phase, trial, cspositive  movement,  cstype
+
+    %  1      1     stretching    none       'none'
+    %  1      1     stretching   stretching  'cs+'
+
+    % --------------- assign cs type into movment ----------
+
+    % identify the cspositive used
+    cspi = {};
+    cspi = sub_avo{1,4};
+
+    % extract movemnet data from coloun 9 which is contained three type of value
+    % none, bending, stretching
+
+    for i  = 1:size(sub_avo,1)
+        % if the value in coloum 9 is equal to 'none' 'none' is saved in coloum
+
+        if  strcmp(sub_avo(i,9),'none') == 1
+
+            sub_avo(i,12) = {['none']};
+            % if the value in coloum 9 is equal to the value saved in cspi, 'cs+' is saved in coloum
+            % 12
+        elseif strcmp(sub_avo(i,9),cspi) == 1
+
+            sub_avo(i,12) = {['cs+']};
+        else
+            % other value is saved in colloum 12 as 'cs-'
+            sub_avo(i,12) = {['cs-']};
+
+        end
+
+    end
+
+
+    % --------- 3. split behavior data into phases -------------
+
+    % ----- note ----
+    % There is no avoidance tested in the manipulation phase,
+    % thus, we only save behaviror data of phase 2 (avoidance phase) and phase
+    % 3 (exploration phase)
+
+
+    % ----- parameters  ----
+
+    % Phase name
+    index_phase = unique(sub_avo(:, 2));
+
+    % Trial number
+    index_trialnum_ph2 = unique([sub_avo{:, 3}]');
+
+    % full trial number 1:48
+
+    fn = [1:48]';
+
+    % if a participant doesn't finish 48 trials reported it and display the
+    % missing trial and subject number
+
+    if isequal(index_trialnum_ph2,fn) ~= 1
+        disp(i)
+        misstrial = fn(ismember(fn,index_trialnum_ph2)== 0)
+    end
+
+
+
+    % ----- split files  ----
+
+    for i = 1: size(index_phase,1)
+
+        %filtered data: match the value in coloum2 ('phase') and variable "phase', only if the
+        %result is return to 1, save the rows into sub1_behavior_phase*
+        %seperately
+
+        sub1_behavior_phase1 = sub_avo(strcmp(sub_avo(:,2),index_phase{1}),:); % coloum 2 = 'phase'
+        sub1_behavior_phase2 = sub_avo(strcmp(sub_avo(:,2),index_phase{2}),:);
+        sub1_behavior_phase3 = sub_avo(strcmp(sub_avo(:,2),index_phase{3}),:);
+
+    end
+
+
+
+    %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %
+    % Avoidance behavior
+    %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    %  ------- parameter for behavior data ----------
+
+    %%% < identify avoidance >
+
+    % room type
+    rm = {['Room 1'],['Room 2']};
+
+    % identify type of rooms based on trials
+    itr = {};
+
+    % identify avoidance
+    iav = [];
+
+
+    %%% < identify CStype >
+
+    % index step in the hall
+    inv = 'none';
+
+    % cstype used in rooms
+    cst = {};
+
+    % index movmemnt used in the first room
+    imov = {};
+
+    % index number of room used in the first room
+    iroomav = {};
+
+    % index cs type
+    index_cstype = {['cs-'],['cs+']};
+
+    % save all data in a structure of avoiance
+
+    savoid = {};
+
+    % phase number
+
+    phase = {['phase1'];['phase2'];'phase3'};
+
+
+
+    % ---------------- 1: code avoidance/no-avoidance -----
+
+    % defined avoidance
+
+    % cs+ ----> cs-
+    % cs- ----> cs+
+
+    % We defined avoidance that If a subject switch rooms(avoid) from room
+    % assicated with cs+ to cs- ,vice verse, there is two types of rooms.
+
+    % To identify the avoidance, the strategy is that to identify types of
+    % rooms contained in a trial.
+
+    % if a trail contains each one of room, value will return to a logic number '1'. Then sum the logic
+    % number, if the result >1, that indicates avoidance.
+
+    
+
+    for i = 1:size(index_trialnum_ph2,1)
+
+        itr = sub1_behavior_phase2([sub1_behavior_phase2{:,3}] == i,7); % coloum 3 = Trial, coloum 7 = ROOM
+        iavi = sum(contains(rm,itr),"all");
+        if iavi == 1
+            iav(i,1) = 0;
+        else
+            iav(i,1) = 1;
+
+        end
+    end
+
+
+    % ---- 2. identify CS type used in first room -------
+
+    % Aim: extact the movement and the room number used in the first room
+    % A trial in our VR environment involves at least 5 steps to complete the
+    % task. And the typic avoidance and non-avoidance is recorded as following:
+
+
+    %       Teleport        CStype
+    %   'Start Trial'       'none'
+    % 'Teleport_Room2_1'    'cs+'
+    % 'Teleport_Room2_2'    'cs+'
+    % 'Teleport_Room2_3'    'cs+'
+    % 'Teleport_Room2_4'    'cs+'
+    %    'placebook'        'cs+'
+
+    %       Teleport        CStype
+    %   'Start Trial'       'none'
+    % 'Teleport_Room2_1'    'cs+'
+    %   'Start Trial'       'none'
+    % 'Teleport_Room1_1'    'cs-'
+    % 'Teleport_Room1_2'    'cs-'
+    % 'Teleport_Room1_3'    'cs-'
+    % 'Teleport_Room1_4'    'cs-'
+    %    'placebook'        'cs-'
+
+
+    % To identify the cs type used in the first room, we employ the following
+    % strategy:
+
+    % 1. Check if the first value in the 'phase' column is equal to 'Start
+    % Trial' and the second value is not equal to 'Start Trial'. If true, then
+    % the second value represents the CS+ associated with the first room.
+
+    % 2. If there is an error (e.g., two consecutive 'Start Trial' values),
+    % then the third value is used instead.
+
+    % 3. Double check for any error indices.
+
+    % 4. Save the trial number, behavior (avoid/non-avoid), and CS type used in
+    % the first room together in a new cell named 'savoid'.
+
+    % 5. Identify if participants avoid the CS- in any trials. If yes, report
+    % the trial number and subject numb
+
+    for i  = 1:size(index_trialnum_ph2,1)
+
+        cst = sub1_behavior_phase2([sub1_behavior_phase2{:,3}] == i,12);     % coloum 12 = movment associated with cstype
+        roombeh = sub1_behavior_phase2([sub1_behavior_phase2{:,3}] == i,7);  % coloum 7 = ROOM (Room 1/ Room 2)
+
+        if strcmp(cst{1,1},inv) == 1 & strcmp(cst{2,1},inv) ~= 1
+
+            imov (i,1) = cst (2,1); %
+
+            % save type of room for the analysis of eye-tracking
+
+            iroomav (i,1) = roombeh (2,1);
+
+        elseif strcmp(cst{1,1},inv) == 1 & strcmp(cst{2,1}, inv) == 1
+
+            imov (i,1) = cst (3,1);
+            iroomav (i,1) = roombeh (3,1);
+
+        end
+
+    end
+
+    % check whether there is a wrong index (e.g., 'none')
+
+    ckcsi = contains(inv,imov);
+
+    if ckcsi ~= 0
+
+        disp(cksci,sn);
+    end
+
+    for i = 1:size(index_trialnum_ph2,1)
+
+        savoid {i,1} = ix;
+        savoid {i,2} = index_trialnum_ph2(i);
+        savoid {i,3} = cspi;
+        savoid {i,4} = imov{i};
+        savoid {i,5} = iav(i);
+
+
+
+    end
+
+
+    % identify if a participants avoid cs- in some trials
+
+    % report the trial number and subject number
+
+    for i = 1:size(index_trialnum_ph2,1)
+
+        if isempty([savoid{i,2}] == 1 & contains(savoid(i,3), {'cs-'})) == 1
+            disp(i) % trial number
+            disp(ix) % subject number
+        end
+    end
+
+    %  -----------  save behavior data in to a personal file   ---------------
+
+    %  A new personal file include cs positive, behavior data, and eye-tracking data
+
+
+    % index the location of CS positive
+    s(ix).csplus_location = cspi;
+
+    % save savoid
+    s(ix).Avoid_behavior.avoidance = savoid;
+
+
+    % clear fcs ckcsi cst fcs  inv sub_avo
+    % clear csi iav itr
+
+
+    %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %
+    % Pavlovian eye-tracking data
+    %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    % ---- parameters ------------------
+
+    %%% < data preprocessing>
+
+    % unify the name of AOIs
+
+    upaoi = {['Bookcase Top Row'],['Empty Spot Top']};
+    loaoi = {['Bookcase Bottom Row'],['Empty Spot Bottom']};
+
+    % CS type
+    mov = {['bending'],['stretching']};
+    cstype = { {['bending'],['stretching']}};
+
+    % create a new variable room
+    room = [];
+
+    % index the 1st and 2nd room
+
+    irme = {['1st_room'],['2nd_room']}';
+
+    % eye-blinking data.mat
+
+    ppd = [];
+
+    % index proportion of invalid data
+    ivd = [];
+
+    % index the subject whos the proporation of invalid data is more than 75%
+    % ivdx, ivdy = coordinate
+
+    % eye=-blinking data associated with movements
+    emd = [];
+
+
+    %%% < eye-tracking data -phase 1 >
+
+    % save the variable name
+    evl  = {''};
+    % save number of trials
+    trl = [];
+    % set the starting time from 0.
+    t0   = 0;
+    % account the times of interval
+    evn  = 0;
+
+    %%%%%% save data in cells %%%%%
+    evmat = {};
+
+    % save the trial number for first fixation
+    fftrialnam = [];
+
+    % save the trial number for total fixation of cs-
+    itcn = {};
+
+    % save the trial number for total fixation of cs+
+    itcp = {};
+
+    % fixation
+    fx = {};
+
+    %%%%% index first fixation for each trial %%%%%
+    iffd = {};
+
+    % index of total fixation duration for cs-
+    iti = {};
+
+    % index of total fixation duration for cs+
+    it = {};
+
+    %%%%% total duration for cs- %%%%%
+    tdcsn = {};
+    %%%%% total duration for cs- %%%%%
+    tdcsp = {};
+
+
+    %%% < eye-tracking data -phase 2 >
+
+    % itrial2 = index the trial number
+    % ifcs2 = cstype
+    % ifrm  = value saved in a room
+
+    % save the variable name
+    evl2  = {''};
+
+    % save number of trials
+    trl2 = [];
+
+    % set the starting time from 0.
+    t0   = 0;
+
+    % account the times of interval
+    evn  = 0;
+
+    %%%%%% save data in cells %%%%%
+    evmat2 = {};
+
+    % save the trial number for first fixation
+    fftrialnam2 = [];
+
+    % index room
+    rnn = [];
+
+    % save the trial number for total fixation of cs-
+    itcn2 = {};
+
+    % save the trial number for total fixation of cs+
+    itcp2 = {};
+
+    % fixation
+    fx2 = {};
+
+    %%%%% index first fixation for each trial %%%%%
+    iffd2 = {};
+
+    % --------- 1. data preprocessing -------------
+
+    % extract focus on AOIs (e.g., ['Bookcase Top Row Room 1'])
+    foc = sub_eye(:,4);
+
+    %  ---- 1.1 assign the type of room into a new variable -'room' -------
+
+    foc (contains(foc,'none')) = {'Room 0'};   % rewrite the 'none' to 'Room 0'
+    pat = lettersPattern(4)+" "+digitsPattern; % patten is identified as ' Room + digital number'
+    room = extract(foc,pat);
+
+    % ---- 1.2 unify AOIs name assign cstype to movement -------
+
+
+    foc (contains(foc,loaoi)) = mov(1);
+    foc (contains(foc,upaoi)) = mov(2);
+
+    csmov = foc;
+
+    % ---- 1.3 assigning the movement associated with each cs type -------
+
+    % If the first movement in the 'mov' array ('stretching') matches the cs+ associated with the movement,
+    % then the corresponding value in 'foc' is assigned as 'cs+'.
+    % Conversely, if the second movement in 'mov' ('bending') matches the cs-, then the
+    %  corresponding value in 'foc' is assigned as 'cs-.'; vice verse.
+
+    if contains(mov(1),cspi) == 1
+        foc(contains(foc,mov(1))) = {'cs+'};
+        foc(contains(foc,mov(2))) = {'cs-'};
+
+    elseif contains(mov(1),cspi) ~= 1
+
+        foc(contains(foc,mov(1))) = {'cs-'};
+        foc(contains(foc,mov(2))) = {'cs+'};
+
+    end
+
+    % ------- 1.4. create new variables of eye-tracking data -------------
+
+    sub_eye(:,7) = foc;   % cs type assoicated with movement ('cs+'/'cs-')
+    sub_eye(:,8) = room;  % room number (Room 0,Room 1,Room 2)
+    sub_eye(:,4) = csmov; % movement ('bending'/'stretching')
+
+
+    index_trialnum_ph1(:,1) = unique([(sub_eye{strcmp(sub_eye(:,2),'phase1'),3})]);
+
+    % remove delay: remove the timestamp which is smaller than the stamp of
+    % start trial
+    % seperate the phases
+
+    % phase 1
+    evn = 0 ;
+
+   sub1_eye_phase1 = {};
+    for i = 1: size(index_trialnum_ph1)
+
+        timestampe_start_trial_phase1 = sub1_behavior_phase1([sub1_behavior_phase1{:,3}]' == index_trialnum_ph1(i) & contains(sub1_behavior_phase1(:,6),'Start Trial'),1);
+
+        index_trial_phase1 = sub_eye(strcmp(sub_eye(:,2),{'phase1'}) & [sub_eye{:,3}]' == index_trialnum_ph1(i) & ([sub_eye{:,1}]'>= timestampe_start_trial_phase1{:}),:);% roomname
+        
+        index_trial_1sttimstam_phase1 = index_trial_phase1{find(strcmp(index_trial_phase1(:,7),'Room 0'),1,"first"),1};
+       
+        index_trial_phase1 = index_trial_phase1([index_trial_phase1{:,1}]>= index_trial_1sttimstam_phase1,:);
+        
+        
+        
+        for ii = 1: size(index_trial_phase1)
+            evn = evn + 1;
+            sub1_eye_phase1(evn,:) = index_trial_phase1(ii,:);
+        end
+
+    end
+
+
+    % phase2: remove delay, identify the 1st and 2nd rooms, and remove
+    %% the second rooms
+    evn = 0;
+
+     sub1_eye_phase2 ={};
+
+    for i = 1: size(index_trialnum_ph2,1)
+
+        last_1st_location = [];
+
+        timestampe_start_trial_phase2 = sub1_behavior_phase2([sub1_behavior_phase2{:,3}]' == index_trialnum_ph2(i) & contains(sub1_behavior_phase2(:,6),'Start Trial'),1);;
+       
+        index_trial_phase2 = sub_eye(strcmp(sub_eye(:,2),{'phase2'}) & [sub_eye{:,3}]' == index_trialnum_ph2(i) & ([sub_eye{:,1}]'>= timestampe_start_trial_phase2{:}) & ([sub_eye{:,1}]'> timestampe_start_trial_phase2{:}),:);
+       
+        index_trial_1sttimstam_phase2 = index_trial_phase2{find(strcmp(index_trial_phase2(:,7),'Room 0'),1,"first"),1};
+        
+        index_trial_phase2 = index_trial_phase2([index_trial_phase2{:,1}]>= index_trial_1sttimstam_phase2,:);
+        
+        last_1st_location= find(strcmp(index_trial_phase2(:,8), iroomav(i)),1,'last');
+
+        index_trial_phase2(1:1:last_1st_location,8) = irme(1);
+
+        index_trial_phase2((last_1st_location+1):1:length(index_trial_phase2),8 ) = irme(2);
+        
+
+        for ii = 1: size(index_trial_phase2)
+            
+            evn = evn+1;
+            sub1_eye_phase2(evn,:) = index_trial_phase2(ii,:);
+        end
+    end
+
+
+    sub1_eye_phase2 = sub1_eye_phase2(~contains(sub1_eye_phase2(:,8),'2nd_room'),:);
+
+
+%     %% phase 3:
+% 
+%     index_trialnum_ph3(:,1) = unique([(sub_eye{strcmp(sub_eye(:,2),'phase3'),3})]);
+%     
+% 
+%     sub1_eye_phase3 ={};
+% 
+%     evn = 0 ;
+% 
+%     for i = 1: size(index_trialnum_ph3)
+% 
+%         timestampe_start_trial_phase3 = sub1_behavior_phase3([sub1_behavior_phase3{:,3}]' == index_trialnum_ph3(i) & contains(sub1_behavior_phase3(:,6),'Start Trial'),1);
+% 
+%         index_trial_phase3 = sub_eye(strcmp(sub_eye(:,2),{'phase3'}) & [sub_eye{:,3}]' == index_trialnum_ph3(i) & ([sub_eye{:,1}]'>= timestampe_start_trial_phase3{:}),:);
+% 
+%         
+%         index_trial_1sttimstam_phase3 = index_trial_phase3{find(strcmp(index_trial_phase3(:,7),'Room 0'),1,"first"),1};
+%         
+%         
+%         index_trial_phase3 = index_trial_phase3([index_trial_phase3{:,1}]>= index_trial_1sttimstam_phase3,:);
+%      
+%         
+%         for ii = 1: size(index_trial_phase3)
+%             evn = evn + 1;
+%             sub1_eye_phase3(evn,:) = index_trial_phase3(ii,:);
+%         end
+% 
+%     end
+% 
+% 
+% 
+% 
+
+
+%% --------- identify proportion of invaild eye blinking through phases ------------------
+    % 
+    % % ---- 1.6 check the proportion of invalid data of pupil dilation -----
+    % 
+    % % pupil dialtion is involved in left and right eyes respectively
+    % % The report of proportion of invalid data
+    % 
+    % % data.frame for example
+    % 
+    % % invaid data(left),    size,     propotion,
+    % 
+    % %              -1	    2800	   0.0337
+    % % invalid data (right),  size,     propotion
+    % %               -1	    2283	   0.0275
+    % 
+    % 
+    % ppd = cell2mat(sub_eye(:,[5,6])); % index eye-blinling data associated with left and right eyes
+    % 
+    % 
+    % ivd(1,:)= reshape([-1,-1;sum(ppd == -1,1);sum(ppd ==-1,1)/size(ppd,1)],[1,6]);
+    % 
+    % % index the subject whos the proporation of invalid data is more than 75%
+    % 
+    % [ivdx,ivdy] = find(ivd(:,[3,6]) >= 0.75);
+    % 
+    
+   
+
+    
+    for i = 1:size(index_trialnum_ph1,1)
+
+        eyemovment_phase1_trial= cell2mat(sub1_eye_phase1([sub1_eye_phase1{:,3}] == index_trialnum_ph1(i),[5,6]));
+        ivp(1,:)= reshape([-1,-1;sum(eyemovment_phase1_trial == -1,1);sum(eyemovment_phase1_trial ==-1,1)/size(eyemovment_phase1_trial,1)],[1,6]);
+        propotioneyeblink_phase1_trials (i,:) = ivp;
+
+        % identify the trials has invaild data in either left or right sides
+
+        if propotioneyeblink_phase1_trials(i,3)>0.5
+            ev = ev + 1;
+            remove_trial{ev,1} = ix;
+            remove_trial{ev,2} = i;
+            remove_trial{ev,3} = 'left';
+            remove_trial{ev,4} = "phase1";
+
+        elseif propotioneyeblink_phase1_trials(i,6)>0.5
+            ev = ev + 1;
+            remove_trial{ev,1} = ix;
+            remove_trial{ev,2} = i;
+            remove_trial{ev,3} = 'right';
+            remove_trial{ev,4} = "phase1";
+        end
+    end
+
+    % average the proprotion of invalid data
+
+    propotioneyeblink_mean_phase1_trials(ix,:) = [mean(propotioneyeblink_phase1_trials(:,3)),mean(propotioneyeblink_phase1_trials(:,6))];
+
+    % identify the participants with more than 50% invalid trial
+
+    if propotioneyeblink_mean_phase1_trials(ix,1)>0.5
+        eve = eve+1;
+        remove_participants{eve,i} = ix;
+
+    elseif propotioneyeblink_mean_phase1_trials(ix,2)>0.5
+        eve = eve+1;
+        remove_participants{eve,1} = ix;
+    end
+
+
+
+    % ----------------- 7. coded the data within 100ms before onset and after the offset of blinks as -1------------------
+
+
+    left  = [];
+    right = [];
+
+    artifacts_left = [];
+    artifacts_right =[];
+
+
+    left  = find([sub1_eye_phase1{:,5}] == -1)';
+    right = find([sub1_eye_phase1{:,6}] == -1)';
+
+
+
+    for i = 1:size(left,1)
+
+        % left(i) -9 >= 1; left(i) + 9 <= size(sub1_eye_phase1,1) (out of
+        % the minimum size) x
+
+        % left(i) - 9 >= 1;left (i) + 9 >= size(sub1_eye_phase1,1) (out of
+        % the maximum size ) x
+
+        % left(i) - 9 <= 1;left (i) + 9 <= size(sub1_eye_phase1,1) (with
+        % the 1: size(phase1) v
+
+        if left(i) -9 <= 1 & left(i) + 9 <= size(sub1_eye_phase1,1)
+
+            artifacts_left(i,:) = [zeros(1,[1-(left(i)-9)]),1:left(i)+9]';
+
+        elseif left(i) - 9 >= 1 & left (i) + 9 >= size(sub1_eye_phase1,1)
+
+           artifacts_left(i,:) = [zeros(1,[left(i)+9-size(sub1_eye_phase1,1)]),left(i)-9:size(sub1_eye_phase1,1)]';
+
+        else 
+
+            artifacts_left(i,:) = [left(i)-9:left(i) + 9 ]';
+
+        end
+    end
+
+    artifacts_left = unique(artifacts_left(find(artifacts_left(:)>0)));
+
+%%
+
+    for i = 1:size(right,1)
+
+        if right(i) -9 <= 1 & right(i) + 9 <= size(sub1_eye_phase1,1)
+
+            artifacts_right(i,:) = [zeros(1,[1-(right(i)-9)]),1:right(i)+9];
+
+        elseif right(i) - 9 >= 1 & right (i) + 9 >= size(sub1_eye_phase1,1)
+
+           artifacts_right(i,:) = [zeros(1,[right(i)+9-size(sub1_eye_phase1,1)]),right(i)-9:size(sub1_eye_phase1,1)]';
+
+
+        else 
+
+          artifacts_right(i,:) = [right(i)-9:right(i) + 9 ]';
+
+        end
+    end
+%%
+    artifacts_right = unique(artifacts_right(find(artifacts_right(:)>0)));
+
+    for i = 1:size(artifacts_left,1)
+        sub1_eye_phase1{artifacts_left(i),5} = -1;
+    end
+
+    for i = 1:size(artifacts_right,1)
+        sub1_eye_phase1{artifacts_right(i),6} = -1;
+    end
+
+
+    for i = 1:size(artifacts_left,1)
+        sub1_eye_phase1{artifacts_left(i),5} = sub1_eye_phase1{artifacts_left(i),6};
+    end
+
+    for i = 1:size(artifacts_right,1)
+        sub1_eye_phase1{artifacts_right(i),6} = sub1_eye_phase1{artifacts_right(i),5};
+    end
+
+    % -------------- 8. average left and right pupil dilation -----------------
+    for i = 1: size(sub1_eye_phase1,1)
+        sub1_eye_phase1(i,9) = {([sub1_eye_phase1{i,6}]'+ [sub1_eye_phase1{i,5}]')/2};
+
+    end
+
+
+    %% ------------ 9. interploation ----------------------------
+    evn1 = 0;
+    sub1_eye_phase1_corrected= {};
+    for i = 1: size(index_trialnum_ph1)
+        sub1_trial=[];
+        locblink = [];
+        sub1_trial = sub1_eye_phase1([sub1_eye_phase1{:, 3}] == index_trialnum_ph1(i), :);
+        locblink(:, 1) = find([sub1_trial{:, 9}] == -1);
+        evn = 1;
+        start_blink = [];
+        end_blink = [];
+
+
+
+        % identify the start and end blink for a time window
+        % with consistent blinks
+
+        for ii = 1:size(locblink, 1)
+
+            % identify the time windows
+            if ii == size(locblink, 1)
+                start_blink(1, 1) = locblink(1); % identify the first eye-blink
+                end_blink(1, 1) = locblink(end);   % identify the last eye-blink
+
+
+            elseif locblink(ii + 1) - locblink(ii) > 9 % two time windows were identifyied that there was a gap with 9 timestampes (100ms)
+                evn = evn + 1;
+                start_blink(evn, 1) = locblink(ii + 1);
+                end_blink(evn, 1) = locblink(ii);
+            end
+
+        end
+
+        start_blink = sort(start_blink) -1; % identidy the location of the nearest timestampe prior the starting blink for each blinking time window
+        end_blink = sort(end_blink) +1;     % identidy the location of  the nearest timestampe after the ending blink for each blinking time window
+
+
+        %identify 4 refence for cue-spline
+
+        for iii = 1: size(start_blink)
+
+            interpsignal = [];
+
+
+            if (start_blink(iii) - end_blink(iii) + start_blink(iii)) <1 | (end_blink(iii) - start_blink(iii) + end_blink(iii)) > size(sub1_trial,1)  % no t1 | no t4
+
+                % if there is no t1 ｜t4 delete the blinks
+                sub1_trial((start_blink(iii)+1):(end_blink(iii)-1),:) = {[]};
+
+
+            else
+                t1_location = (start_blink(iii) - end_blink(iii) + start_blink(iii));
+                t4_location = end_blink(iii) - start_blink(iii) + end_blink(iii);
+
+
+                t2  = [sub1_trial{start_blink(iii),1}];
+                t3  = [sub1_trial{end_blink(iii),1}];
+
+                if [sub1_trial{t1_location,9}] == -1
+
+                    t1  = [sub1_trial{find(([sub1_trial{:, 1}] < [sub1_trial{t1_location, 1}]) & ([sub1_trial{:, 9}] ~= -1), 1, 'last'),1}];
+                    t1_location = find([sub1_trial{:,1}] == t1);
+                else
+                    t1  = [sub1_trial{t1_location,1}];
+
+                end
+
+
+
+                % if there is no invaild reference
+
+                if ([sub1_trial{t4_location,9}] == -1) & ([sub1_trial{size(sub1_trial,1):t4_location,9}] ~= -1)
+                    t4  = [sub1_trial{find(([sub1_trial{:, 1}] > [sub1_trial{t4_location, 1}]) & ([sub1_trial{:, 9}] ~= -1), 1, 'first'),1}];
+
+                    t4_location = find([sub1_trial{:,1}] == t4);
+
+                elseif [sub1_trial{size(sub1_trial,1):t4_location,9}] == -1| t4_location > length(sub1_trial)
+                    sub1_trial((start_blink(iii)+1):(end_blink(iii)-1),:) = {[]};
+
+                    continue
+
+                else
+                    t4  = [sub1_trial{t4_location,1}];
+                end
+
+
+
+                timepoints = [t1,t2,t3,t4];
+
+                B_point = [sub1_trial{start_blink(iii),9}]; % pupil size
+                C_point = [sub1_trial{end_blink(iii),9}];
+                A_point = [sub1_trial{t1_location,9}];
+                D_point = [sub1_trial{t4_location,9}];
+
+                pupilsize = [A_point,B_point,C_point,D_point];
+
+                % Generate the cubic spline interpolation
+
+                interpolate_range =  linspace(t2,t3,length(start_blink(iii):1:end_blink(iii)));
+                interpsignal(:,1) = interp1(timepoints,pupilsize, interpolate_range, 'spline');
+                for iiii = 1: size(interpsignal)
+                    eye_blink_location = [start_blink(iii):1:end_blink(iii)];
+                    sub1_trial(eye_blink_location(iiii), 9) = {interpsignal(iiii)};
+                end
+
+            end
+        end
+
+
+                  % Create a logical index to identify non-empty rows
+                  nonemptyrows = ~any(cellfun(@isempty, sub1_trial), 2);
+
+                  % Select non-empty rows
+                  sub1_trial = sub1_trial(nonemptyrows, :);
+
+
+
+        %----------------- baseline correction -----------------
+
+%   identify the baseline correction
+
+        pat = 'Teleport_Room'+ digitsPattern(1)+'_1' ;
+        % extract the timestamp for the first step of entering the room
+        % if there is two " teleport 1" select the first 1
+        index_opendoor = sub1_behavior_phase1{find([sub1_behavior_phase1{:,3}]' == index_trialnum_ph1(i) & contains(sub1_behavior_phase1(:,8),pat),1,'first'),1};
+        % identify 90 timestampes before open the door
+         % if there is no 90 timestampes then deletthe trial 
+        if (find([sub1_trial{:,1}] < index_opendoor,1,'last') - 19) <= 0
+            evn1 = evn1 +1;
+            sub1_eye_phase1_corrected(evn1,:) ={[]};
+
+% remove_trial 
+             ev = ev +1; 
+            remove_trial{ev,1} = ix;
+            remove_trial{ev,2} = sub1_trial{1,3};
+            remove_trial{ev,3} = 'baseline';
+            remove_trial{ev,4} = "phase1";
+
+
+        else
+            index_opendoor_location = find([sub1_trial{:,1}] < index_opendoor,1,'last');
+
+            index_baseline_range = [(index_opendoor_location - 19):index_opendoor_location ];
+
+            index_averagebaseline = mean([sub1_trial{index_baseline_range,9}]);
+
+
+            for iiiii = 1: size(sub1_trial)
+                % Round to four decimal places.
+                sub1_trial(iiiii,9) = num2cell(round(cell2mat(sub1_trial(iiiii,9)) - index_averagebaseline, 4));
+                evn1 = evn1 +1;
+                sub1_eye_phase1_corrected(evn1,:) = sub1_trial(iiiii,:);
+            end
+        end
+
+    end
+
+%%
+  % Create a logical index to identify non-empty rows
+nonEmptyRows = ~any(cellfun(@isempty, sub1_eye_phase1_corrected),2);
+
+% Select non-empty rows
+sub1_eye_phase1_corrected = sub1_eye_phase1_corrected(nonEmptyRows,:);
+
+
+
+    % identify the participants with more than 50% invalid trial
+
+    if propotioneyeblink_mean_phase1_trials(ix,1)>0.5
+        eve = eve+1;
+        remove_participants{eve,i} = ix;
+
+    elseif propotioneyeblink_mean_phase1_trials(ix,2)>0.5
+        eve = eve+1;
+        remove_participants{eve,1} = ix
+    end
+
+
+
+%% ---------- 10. extract the pupil dilation associated with cstype  ------------
+
+% indextn_corrected = unique([sub1_eye_phase1_corrected{:,3}]);
+
+    evn = 0;
+    evmat = {};
+    pupildilation = {};
+    indextn1_corrected = [];
+
+    indextn1_corrected(:,1) = unique([sub1_eye_phase1_corrected{:,3}]);
+
+    for i = 1: size(indextn1_corrected,1)
+
+        Phase1_PD = sub1_eye_phase1_corrected([sub1_eye_phase1_corrected{:,3}] == indextn1_corrected(i),:);
+
+        cstrial = sub1_behavior_phase1([sub1_behavior_phase1{:,3}]' == indextn1_corrected(i)...
+            & contains(sub1_behavior_phase1(:,8),pat),12);
+
+
+        PD_csp = mean([Phase1_PD{strcmp(Phase1_PD(:,7),{'cs+'}),9}]);
+
+        PD_csm =  mean([Phase1_PD{strcmp(Phase1_PD(:,7),{'cs-'}),9}]);
+
+        evn = evn +1;
+        evmat(evn,1) = {ix}; % subject_id
+        evmat(evn,2) = {indextn1_corrected(i)}; % trial_number
+        evmat(evn,3) = cstrial(1); % cstrial
+        evmat(evn,4) = {'cs+'}; % cstype
+        evmat(evn,5) = {PD_csp};
+        evmat(evn,6) = {'cs-'};
+        evmat(evn,7) = {PD_csm};
+    end
+
+    s(ix).Pavlov_fixation.pupil_cstrial = evmat;
+
+
+
+    %%  --------- 3: idenfity the time to first fixation for Pavlov phase -------------
+
+    %   ------- note -----------
+
+    % Aim: To identify the time to first fixation associated with cs+ and cs-
+    % Defination: To identify the duration from when the participant enters the room
+    % until the first fixation (100ms) on cs+ and cs- is made.
+
+    % Strategy:
+    % 1. Index the timestamp of the first step (behavior data) for each trial.
+    % 2. Index the timestamp of the first onset fixation of cs+ and cs-.
+    % 3. Calculate the time to the first fixation by subtracting the timestamp
+    % of the first step from the timestamp of the first fixation.
+
+
+    % 4. Save the data into
+    % s(ix).pavlovian_phase.TFF
+    % s(ix).avoidance_phase.TFF
+
+    %  data.frame for example
+
+    %  phase, trial,  TFF_csp, TFF_csn
+    %       1,     1,    2.23,   2.24,
+
+    % --------- Step 7: identify the probability of the first fixation (PFF) --------------
+
+    %  ----- note -------
+
+    % Aim: To identify the probability of the first fixation associated with
+    % cs+ and cs-. Strategy: Aim: To identify the first fixation (0.011s) of cs
+    % type. Within a trial, if the initial timestamp is on the trial is matched
+    % with cstrials then it will be coded as cs- /cs+, if the cs+ match
+    % with cs+ coded as 1 otherwise it will be coded as 0. 
+
+    % data.frame for example:
+
+    %  trial,  cstrial, pff, cs+ ,   TFF,   PFF,   cs-,  TFF,
+    %     1,    cs+   ,    1  ,cs+ ,  2.23,     0,   cs-,  2.24,
+
+    % ------------ parameter ----------
+
+    % save data matching conditions into a new cell
+    evmat = {};
+    % save the row with initial timestamp associated with cs+
+    cspTFF = [];
+
+    % save the row with initial timestamp associated with cs-
+    csnTFF = [];
+
+    % save the row with initial timestamp of entering into the room
+    ientroom = [];
+    % cstype used in the trial
+    % cstrial = {};
+
+    evnmat = {};
+
+    % index the probability of first fixation
+    iPFF = {};
+
+    test = [];
+
+    % identify fixation
+
+    fx = {};
+
+    %  ----------- TFF & PFF --------------
+    % ----- group timestamps with a same name -----
+
+
+%
+evn = 0 ;
+evmat ={};
+
+for i = 1:2%:size(indextn1_corrected)
+    sub1_trial_name = {};
+
+
+    itrial1 = indextn1_corrected(i);
+
+    sub1_trial_name = sub1_eye_phase1_corrected([sub1_eye_phase1_corrected{:,3}] == indextn1_corrected(i),:);
+
+    for ii = 1:size(sub1_trial_name,1)
+
+        ifcs1 = sub1_trial_name (ii,7);
+
+        if ii > 2
+            t1 =  sub1_trial_name {ii-1,1};
+        else
+            t1 = t0;
+        end
+
+
+        if ii ~= size(sub1_trial_name, 1) && isempty (evl) || ~strcmp (ifcs1(1),evl(1))
+
+            evn = evn+1;
+
+            evmat {evn,1}  = itrial1;      % trial number
+            evmat {evn,2}  = evl{1};   % same variable
+            evmat {evn,3}  = [t0, t1]; % duration with starting and ending time
+            evmat {evn,4}  = t1-t0 + 0.011;    % duration of fixation
+            evmat {evn,5}  = t0;
+
+            evl = ifcs1;
+            t0  = sub1_trial_name {ii,1};
+
+        end 
+        if ii == size(sub1_trial_name, 1) && ~isempty(evl) && strcmp(ifcs1(1), evl(1))
+            evn = evn + 1;
+            evmat{evn, 1} = itrial1;                    % trial number
+            evmat{evn, 2} = evl{1};                 % cs type
+            evmat{evn, 3} = [t0, t1];               % duration with starting and ending time
+            evmat{evn, 4} = t1 - t0 + 0.011;        % duration of fixation
+            evmat{evn, 5} = t0;
+        end
+
+    end
+
+end
+
+     %
+     evn = 0 ;
+ for i = 1:size (sub1_eye_phase1_corrected,1)
+
+
+        % index trial number
+        itrial1 = sub1_eye_phase1_corrected{i,3};
+
+        % index fixation on cstype
+        ifcs1 = sub1_eye_phase1_corrected(i,7);
+
+        if i > 1
+            t1 =  sub1_eye_phase1_corrected{i-1,1};
+        else
+            t1 = t0;
+        end
+
+
+        if isempty (evl) || ~strcmp (ifcs1(1),evl(1))
+
+            evn = evn+1;
+
+
+            evmat {evn,1}  = trl;      % trial number
+            evmat {evn,2}  = evl{1};   % same variable
+            evmat {evn,3}  = [t0, t1]; % duration with starting and ending time
+            evmat {evn,4}  = t1-t0 + 0.011;    % duration of fixation
+            evmat {evn,5}  = t0;
+            trl = itrial1;
+            evl = ifcs1;
+            t0  = sub1_eye_phase1_corrected{i,1};
+
+
+        end
+
+         if i == size(sub1_eye_phase1_corrected, 1) && ~isempty(evl) && strcmp(ifcs1(1), evl(1))
+            evn = evn + 1;
+            evmat{evn, 1} = itrial1;                    % trial number
+            evmat{evn, 2} = evl{1};                 % cs type
+            evmat{evn, 3} = [t0, t1];               % duration with starting and ending time
+            evmat{evn, 4} = t1 - t0 + 0.011;        % duration of fixation
+            evmat{evn, 5} = t0;
+        end
+    end
+    %% fixation and duration for each trial
+    evmat = evmat(2:end,:);
+
+
+    % filter the first fixation > 0.1s on cs type for each trial
+
+    fx = evmat([evmat{:,4}]' > 0.1 & (strcmp(evmat(:,2), index_cstype(1)) | strcmp(evmat(:,2), index_cstype(2))),:);
+
+
+    % define array patten of the first step for the procedure of entering the room
+
+    pat = 'Teleport_Room'+ digitsPattern(1)+'_1' ;
+
+    evn = 0;
+
+    for i = 1 : size(indextn1_corrected,1)
+        evn = evn + 1;
+
+        cstrial = sub1_behavior_phase1([sub1_behavior_phase1{:,3}]' == indextn1_corrected(i)...
+            & contains(sub1_behavior_phase1(:,8),pat),12);
+
+
+        % extract the timestamp for the first step of entering the room
+        ientroom = sub1_behavior_phase1{[sub1_behavior_phase1{:,3}]' == indextn1_corrected(i)...
+            & contains(sub1_behavior_phase1(:,8),pat),1};
+
+
+        % extract the timestamp for the first timestamp associated with cs type
+        % Calculate the time to the first fixation by subtracting the timestamp
+        % of the first step from the timestamp of the first fixation.
+
+
+        if isempty(fx(find([fx{:,1}]' == indextn1_corrected(i) & ...
+                strcmp(fx(:,2),index_cstype(2)),1))) == 1
+
+            cspTFF = 0;
+        else
+            cspTFF = fx{find([fx{:,1}]' == indextn1_corrected(i) & ...
+                strcmp(fx(:,2),index_cstype(2)),1),5} - ientroom;
+
+        end
+
+        if isempty(fx(find([fx{:,1}]' == indextn1_corrected(i) & ...
+                strcmp(fx(:,2),index_cstype(1)),1))) == 1
+
+            csnTFF = 0;
+        else
+            csnTFF = fx{find([fx{:,1}]' == indextn1_corrected(i) & ...
+                strcmp(fx(:,2),index_cstype(1)),1),5} - ientroom;
+
+        end
+
+
+        % index the probability of first fixation for next step
+        iPFF = fx(find([fx{:,1}]' == indextn1_corrected(i) & ...
+            (strcmp(fx(:,2),index_cstype(2))|strcmp(fx(:,2),index_cstype(1))),1,'first'),[1,2]);
+
+
+        if contains(iPFF(:,2),{'cs+'}) == 1
+            test = 1;
+        else
+            test = 0;
+        end
+
+
+
+        % create a table
+        evnmat {evn,1} = ix;
+        evnmat {evn,2} = indextn1_corrected(i);
+        evnmat {evn,3} = cspi; % upper and lower location
+        evnmat {evn,4} = cstrial{:};
+        evnmat {evn,5} = test;
+
+        evnmat {evn,6} = ['cs+'];
+
+        evnmat {evn,7} = cspTFF;
+
+        evnmat {evn,8} = ['cs-'];
+        evnmat {evn,9} = csnTFF;
+
+
+
+    end
+
+    % save first fixation to personal file
+
+    s(ix).Pavlov_fixation.timetoFixfixation = evnmat;
+
+    %% ----- 4. identify total fixation duration for Pavlov phase ------------
+
+    % --------- note -----------------
+    % Aim： to idenftiy total fixation duration
+    % total fixation duration is calculated by summing up all timestamps of cs+
+    % and cs- seperately.
+    % In case there is no fixation recorded for one of the cs types in a trial,
+    % we identify the trial number associated with the duration of each cstype
+
+    tdcst = {};
+
+    %  clear itrial1 ifcs1 evl trl t0 t1 fftrialnam cspi
+
+
+    % ---------- total fixation duration  -----------------
+
+
+    % sum up all segerements of duration associated with cs-
+
+    evn = 0;
+
+    for i = 1 : size(indextn1_corrected,1)
+
+        cstrial = sub1_behavior_phase1([sub1_behavior_phase1{:,3}]' == indextn1_corrected(i)...
+            & contains(sub1_behavior_phase1(:,8),pat),12);
+
+        it = evmat([evmat{:,1}]' == indextn1_corrected(i) & (strcmp(evmat(:,2), index_cstype(2))),:); % ics(2) = cs+
+        iti = evmat([evmat{:,1}]' == indextn1_corrected(i) & (strcmp(evmat(:,2), index_cstype(1))),:); %ics(1) = cs-
+
+        % sum up all segerements of duration associated with cs-
+        if isempty(it) == 1
+            tcsp = 0;
+
+        else
+
+            tcsp = sum([it{(strcmp(it(:,2),index_cstype(2))),4}]); % cs= positive
+        end
+
+        if isempty(iti) == 1
+            tcsn = 0;
+        else
+            tcsn = sum([iti{(strcmp(iti(:,2),index_cstype(1))),4}]); % csn = negative
+        end
+
+        evn = evn + 1;
+
+
+        tdcst {evn,1} = ix;
+        tdcst {evn,2} = cspi;
+        tdcst {evn,3} = cstrial(1);
+        tdcst {evn,4} = indextn1_corrected(i);
+        tdcst {evn,5} = 'cs+';
+        tdcst {evn,6} = tcsp;
+        tdcst {evn,7} = 'cs-';
+        tdcst {evn,8} = tcsn;
+
+
+
+    end
+
+    s(ix).Pavlov_fixation.totalfixation = tdcst;
+
+    % clear tdcsp iti it tdcsn tcsn itcp itcpt itcp itcn itcnt
+
+
+
+%     %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     %
+%     % avoidance phase
+%     %
+%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+     for i = 1:size(index_trialnum_ph2,1)
+
+        phase2_trial= cell2mat(sub1_eye_phase2([sub1_eye_phase2{:,3}] == index_trialnum_ph2(i),[5,6]));
+        ivp(1,:)= reshape([-1,-1;sum(phase2_trial == -1,1);sum(phase2_trial ==-1,1)/size(phase2_trial,1)],[1,6]);
+        propotioneyeblink_phase2_trials (i,:) = ivp;
+
+        % identify the trials has invaild data in either left or right sides
+
+        if propotioneyeblink_phase2_trials(i,3)>0.5
+            ev = ev + 1;
+            remove_trial{ev,1} = ix;
+            remove_trial{ev,2} = i;
+            remove_trial{ev,3} = 'left';
+            remove_trial{ev,4} = "phase2";
+
+        elseif propotioneyeblink_phase2_trials(i,6)>0.5
+            ev = ev + 1;
+            remove_trial {ev,1} = ix;
+            remove_trial {ev,2} = i;
+            remove_trial {ev,3} = 'right';
+            remove_trial {ev,4} = "phase2";
+        end
+    end
+
+    % average the proprotion of invalid data
+
+    propotioneyeblink_mean_phase2_trials(ix,:) = [mean(propotioneyeblink_phase2_trials(:,3)),mean(propotioneyeblink_phase2_trials(:,6))];
+
+    % identify the participants with more than 50% invalid trial
+
+    if propotioneyeblink_mean_phase2_trials(ix,1)>0.5
+        eve = eve+1;
+        remove_participants{eve,1} = ix;
+
+    elseif propotioneyeblink_mean_phase2_trials(ix,2)>0.5
+        eve = eve+1;
+        remove_participants{eve,1} = ix;
+    end
+
+
+
+    %% --------- 2. average the left and right pupil dilation ---------------
+
+    % --- 2.1 oded the data within 100ms before onset and after the offset of blinks as -1- ---------------
+
+
+    left  = [];
+    right = [];
+
+    artifacts_left = [];
+    artifacts_right =[];
+
+
+    left  = find([sub1_eye_phase2{:,5}] == -1)';
+    right = find([sub1_eye_phase2{:,6}] == -1)';
+
+
+
+
+  for i = 1:size(left,1)
+
+
+        if left(i) -9 <= 1 & left(i) + 9 <= size(sub1_eye_phase2,1)
+
+            artifacts_left(i,:) = [zeros(1,[1-(left(i)-9)]),1:left(i)+9]';
+
+        elseif left(i) - 9 >= 1 & left (i) + 9 >= size(sub1_eye_phase2,1)
+
+           artifacts_left(i,:) = [zeros(1,[left(i)+9-size(sub1_eye_phase2,1)]),left(i)-9:size(sub1_eye_phase2,1)]';
+
+        else 
+
+            artifacts_left(i,:) = [left(i)-9:left(i) + 9 ]';
+
+        end
+    end
+
+
+   artifacts_left =  artifacts_left(find(artifacts_left(:)>0));
+
+    for i = 1:size(right,1)
+
+        if right(i) -9 <= 1 & right(i) + 9 <= size(sub1_eye_phase2,1)
+
+            artifacts_right(i,:) = [zeros(1,[1-(right(i)-9)]),1:right(i)+9]';
+
+        elseif right(i) - 9 >= 1 & right (i) + 9 >= size(sub1_eye_phase2,1)
+
+           artifacts_right(i,:) = [zeros(1,[right(i)+9-size(sub1_eye_phase2,1)]),right(i)-9:size(sub1_eye_phase2,1)]';
+
+        else 
+
+            artifacts_right(i,:) = [right(i)-9:right(i) + 9 ]';
+
+        end
+    end
+
+   artifacts_right = artifacts_right(find(artifacts_right(:)>0));
+
+
+    for i = 1:size(artifacts_left,1)
+        sub1_eye_phase2{artifacts_left(i),5} = -1;
+    end
+
+    for i = 1:size(artifacts_right,1)
+        sub1_eye_phase2{artifacts_right(i),6} = -1;
+    end
+
+
+    for i = 1:size(artifacts_left,1)
+        sub1_eye_phase2{artifacts_left(i),5} = sub1_eye_phase2{artifacts_left(i),6};
+    end
+
+    for i = 1:size(artifacts_right,1)
+        sub1_eye_phase2{artifacts_right(i),6} = sub1_eye_phase2{artifacts_right(i),5};
+    end
+
+    % --------- 2.2  average pupil dilation of left and right side -----------
+
+    for i = 1: size(sub1_eye_phase2,1)
+        sub1_eye_phase2(i,9) = {([sub1_eye_phase2{i,6}]'+ [sub1_eye_phase2{i,5}]')/2};
+    end
+
+    phase2_PD = sub1_eye_phase2([sub1_eye_phase2{:,9}] ~= -1,[1:4,7,9]);
+
+
+
+
+
+%     %% ----------------- 3. interpolation -------------------------------
+
+   sub1_eye_phase2_corrected= {};
+    evn1 = 0;
+    for i = 1: size(index_trialnum_ph2)
+        sub1_trial={};
+        locblink = [];
+        sub1_trial = sub1_eye_phase2([sub1_eye_phase2{:, 3}] == index_trialnum_ph2(i), :);
+        locblink(:,1) = find([sub1_trial{:, 9}] == -1)';
+        evn = 1;
+        start_blink = [];
+        end_blink = [];
+
+
+
+        % identify the start and end blink for a time window
+        % with consistent blinks
+
+        for ii = 1:size(locblink, 1)
+
+            % identify the time windows
+            if ii == size(locblink, 1)
+                start_blink(1, 1) = locblink(1); % identify the first eye-blink
+                end_blink(1,1) = locblink(end);   % identify the last eye-blink
+
+
+            elseif locblink(ii + 1) - locblink(ii) > 9 % two time windows were identifyied that there was a gap with 9 timestampes (100ms)
+                evn = evn + 1;
+                start_blink(evn,1) = locblink(ii + 1);
+                end_blink(evn,1) = locblink(ii);
+            end
+
+        end
+
+        start_blink = sort(start_blink) -1; % identidy the location of the nearest timestampe prior the starting blink for each blinking time window
+        end_blink = sort(end_blink) +1;     % identidy the location of  the nearest timestampe after the ending blink for each blinking time window
+
+
+        %identify 4 refence for cue-spline
+
+        for iii = 1: size(start_blink)
+
+            interpsignal = [];
+
+
+            if (start_blink(iii) - end_blink(iii) + start_blink(iii)) <1 | (end_blink(iii) - start_blink(iii) + end_blink(iii)) > size(sub1_trial,1)  % no t1 | no t4
+
+                % if there is no t1 ｜t4 delete the blinks
+                sub1_trial((start_blink(iii)+1):(end_blink(iii)-1),:) = {[]};
+
+
+            else
+                t1_location = (start_blink(iii) - end_blink(iii) + start_blink(iii));
+                t4_location = end_blink(iii) - start_blink(iii) + end_blink(iii);
+
+
+                t2  = [sub1_trial{start_blink(iii),1}];
+                t3  = [sub1_trial{end_blink(iii),1}];
+
+                if [sub1_trial{t1_location,9}] == -1
+
+                    t1  = [sub1_trial{find(([sub1_trial{:, 1}] < [sub1_trial{t1_location, 1}]) & ([sub1_trial{:, 9}] ~= -1), 1, 'last'),1}];
+                    t1_location = find([sub1_trial{:,1}] == t1);
+                else
+                    t1  = [sub1_trial{t1_location,1}];
+
+                end
+
+
+
+                % if there is no invaild reference
+
+                if ([sub1_trial{t4_location,9}] == -1) & ([sub1_trial{size(sub1_trial,1):t4_location,9}] ~= -1) 
+                     t4  = [sub1_trial{find(([sub1_trial{:, 1}] > [sub1_trial{t4_location, 1}]) & ([sub1_trial{:, 9}] ~= -1), 1, 'first'),1}];
+
+                     t4_location = find([sub1_trial{:,1}] == t4);
+
+
+
+                elseif [sub1_trial{size(sub1_trial,1):t4_location,9}] == -1 | t4_location > length(sub1_trial)
+                        sub1_trial((start_blink(iii)+1):(end_blink(iii)-1),:) = {[]};
+
+
+
+
+                 continue 
+
+                else
+                    t4  = [sub1_trial{t4_location,1}];
+                end
+
+
+
+                timepoints = [t1,t2,t3,t4];
+
+                B_point = [sub1_trial{start_blink(iii),9}]; % pupil size
+                C_point = [sub1_trial{end_blink(iii),9}];
+                A_point = [sub1_trial{t1_location,9}];
+                D_point = [sub1_trial{t4_location,9}];
+
+                pupilsize = [A_point,B_point,C_point,D_point];
+
+                % Generate the cubic spline interpolation
+
+                interpolate_range =  linspace(t2,t3,length(start_blink(iii):1:end_blink(iii)));
+                interpsignal(:,1) = interp1(timepoints,pupilsize, interpolate_range, 'spline');
+                for iiii = 1: size(interpsignal)
+                    eye_blink_location = [start_blink(iii):1:end_blink(iii)];
+                    sub1_trial(eye_blink_location(iiii), 9) = {interpsignal(iiii)};
+                end
+
+            end
+        end
+
+                        % Create a logical index to identify non-empty rows
+                        nonemptyrows = ~any(cellfun(@isempty, sub1_trial), 2);
+
+                        % Select non-empty rows
+                        sub1_trial = sub1_trial(nonemptyrows, :);
+
+
+        %----------------- baseline correction -----------------
+
+
+
+%   identify the baseline correction
+
+        pat = 'Teleport_Room'+ digitsPattern(1)+'_1' ;
+        % extract the timestamp for the first step of entering the room
+        % if there is two " teleport 1" select the first 1
+        index_opendoor = sub1_behavior_phase2{find([sub1_behavior_phase2{:,3}]' == index_trialnum_ph2(i) & contains(sub1_behavior_phase2(:,8),pat),1,'first'),1};
+        % identify 200ms timestampes before open the door
+         % if there is no 90 timestampes then deletthe trial 
+        if (find([sub1_trial{:,1}] < index_opendoor,1,'last') - 19) <= 0
+            evn1 = evn1 +1;
+            sub1_eye_phase2_corrected(evn1,:) ={[]};
+
+% remove_trial 
+             ev = ev +1; 
+            remove_trial{ev,1} = ix;
+            remove_trial{ev,2} = sub1_trial{1,3};
+            remove_trial{ev,3} = 'baseline';
+            remove_trial{ev,4} = "phase2";
+
+
+        else
+            index_opendoor_location = find([sub1_trial{:,1}] < index_opendoor,1,'last');
+
+            index_baseline_range = [(index_opendoor_location - 19):index_opendoor_location ];
+
+            index_averagebaseline = mean([sub1_trial{index_baseline_range,9}]);
+
+
+            for iiiii = 1: size(sub1_trial)
+                % Round to four decimal places.
+                sub1_trial(iiiii,9) = num2cell(round(cell2mat(sub1_trial(iiiii,9)) - index_averagebaseline, 4));
+                evn1 = evn1 +1;
+                sub1_eye_phase2_corrected(evn1,:) = sub1_trial(iiiii,:);
+            end
+        end
+
+    end
+
+%%
+  % Create a logical index to identify non-empty rows
+nonEmptyRows = ~any(cellfun(@isempty, sub1_eye_phase2_corrected),2);
+
+% Select non-empty rows
+sub1_eye_phase2_corrected = sub1_eye_phase2_corrected(nonEmptyRows,:);
+
+
+
+    %% --------- 4. pupil dilation -------------------
+
+    % cs_trial and trials 
+    % indextn_corrected = unique([sub1_eye_phase1_corrected{:,3}]);
+
+    evn = 0;
+    evmat = {};
+    pupildilation = {};
+    indextn2_corrected = [];
+
+    indextn2_corrected(:,1) = unique([sub1_eye_phase2_corrected{:,3}]);
+
+    for i = 1: size(indextn2_corrected,1)
+
+        Phase2_PD = sub1_eye_phase2_corrected([sub1_eye_phase2_corrected{:,3}] == indextn2_corrected(i),:);
+
+        cstrial = sub1_behavior_phase2([sub1_behavior_phase2{:,3}]' == indextn2_corrected(i)...
+            & contains(sub1_behavior_phase2(:,8),pat),12);
+
+
+        PD_csp = mean([Phase2_PD{strcmp(Phase2_PD(:,7),{'cs+'}),9}]);
+
+        PD_csm =  mean([Phase2_PD{strcmp(Phase2_PD(:,7),{'cs-'}),9}]);
+
+        evn = evn +1;
+        evmat(evn,1) = {ix}; % subject_id
+        evmat(evn,2) = {indextn2_corrected(i)}; % trial_number
+        evmat(evn,3) = cstrial(1); % cstrial
+        evmat(evn,4) = {'cs+'}; % cstype
+        evmat(evn,5) = {PD_csp};
+        evmat(evn,6) = {'cs-'};
+        evmat(evn,7) = {PD_csm};
+    end
+
+
+    s(ix).Avoid_fixation.pupil_cstrial = evmat;
+
+
+
+
+
+    %% --------- 4. time to first fixation and probability of first fixation ---------
+
+    %  ----- note -------
+
+    % Aim: To identify the probability of the first fixation associated with
+    % cs+ and cs-. Strategy: Aim: To identify the first fixation (0.011s) of cs
+    % type. Within a trial, if the initial timestamp is on cs+, then it will be
+    % coded as 1, cs- will be coded as 0,and vice versa.
+
+    % data.frame for example:
+
+    %  trial,   cs+ ,   TFF,   PFF,   cs-,  TFF,   PFF,
+    %     1,    cs+ ,  2.23,     0,   cs-,  2.24,    1,
+
+
+    % ------------ Parameter --------------
+    % save data
+    evmat2 = {};
+
+    % trialnumber
+    p2itnTFF =[];
+
+    % save the row with initial timestamp associated with cs+
+    p2cspTFF = [];
+
+    % save the row with initial timestamp associated with cs-
+    p2csnTFF = [];
+
+    % save the row with initial timestamp of entering into the room
+    p2ientroom = [];
+
+    evnmat = {};
+
+    % index the probability of first fixation
+    p2iPFF = {};
+
+    p2test = [];
+
+    %  ----------- TFF & PFF --------------
+
+
+    % -------- group timestamps with a same name --------
+
+
+    evn = 0;
+
+    fx = {};
+
+    for i = 1:size (sub1_eye_phase2_corrected,1)
+
+        % index trial number
+        itrial2 = sub1_eye_phase2_corrected{i,3};
+
+        % index fixation on cstype
+        ifcs2 = sub1_eye_phase2_corrected (i,7);
+
+        % create a new cell with
+
+        if i > 1
+            t1 =  sub1_eye_phase2_corrected{i-1,1};
+        else
+            t1=t0;
+        end
+
+
+        if isempty (evl2) | ~strcmp (ifcs2(1),evl2(1))
+
+            evn = evn+1;
+
+
+            evmat2 {evn,1}  = trl2;       % trial number
+            evmat2 {evn,2}  = evl2{1};    % cs type
+            evmat2 {evn,3}  = [t0, t1];   % duration with starting and ending time
+            evmat2 {evn,4}  = t1-t0+0.011;  % duration of fixation
+            evmat2 {evn,5}  = t0;
+
+            t0  = sub1_eye_phase2_corrected{i,1};
+            evl2 = ifcs2;
+            trl2 = itrial2;
+        end
+
+        if i == size(sub1_eye_phase2_corrected, 1) && ~isempty(evl2) && strcmp(ifcs2(1), evl2(1))
+            evn = evn + 1;
+
+            evmat2{evn, 1} = trl2;                    % trial number
+            evmat2{evn, 2} = evl2{1};                 % cs type
+            evmat2{evn, 3} = [t0, t1];               % duration with starting and ending time
+            evmat2{evn, 4} = t1 - t0 + 0.011;        % duration of fixation
+            evmat2{evn, 5} = t0;
+        end
+    end
+
+    evmat2 = evmat2(2:end,:);
+
+    % --- filter data associated with cs type --------
+
+    fx = evmat2([evmat2{:,4}]' > 0.1 & (strcmp(evmat2(:,2), index_cstype(1)) | strcmp(evmat2(:,2), index_cstype(2))),:);
+
+
+
+    % identify the trial number of eye - tracking data used in phase 1
+
+    isp2 = sub1_eye_phase2_corrected;
+
+    % index the trial number
+    p2itnTFF = unique([sub1_eye_phase2_corrected{:,3}]');
+
+    % define array patten of the first step for the procedure of entering the room
+
+
+    evn = 0;
+
+    for i = 1 : size(p2itnTFF,1)
+        evn = evn + 1;
+
+        cstrial  = savoid([savoid{:,2}] == p2itnTFF(i),4);
+
+
+        % extract the timestamp for the first step of entering the room
+        p2ientroom = sub1_behavior_phase2{find([sub1_behavior_phase2{:,3}]' == p2itnTFF(i)...
+            & contains(sub1_behavior_phase2(:,8),pat),1),1};
+
+
+        % extract the timestamp for the first timestamp associated with cs type
+        % Calculate the time to the first fixation by subtracting the timestamp
+        % of the first step from the timestamp of the first fixation.
+
+
+        if isempty(fx(find([fx{:,1}]' == p2itnTFF(i) ...
+                & strcmp(fx(:,2),index_cstype(2)),5))) == 1
+
+            p2cspTFF = 0;
+
+        else
+
+            p2cspTFF = fx{find([fx{:,1}]' == p2itnTFF(i) ...
+                & strcmp(fx(:,2),index_cstype(2)),1),5} - p2ientroom;
+            %
+        end
+
+        if isempty(fx(find([fx{:,1}]' == p2itnTFF(i) ...
+                & strcmp(fx(:,2),index_cstype(1)),1))) == 1
+
+            p2csnTFF = 0;
+
+        else
+
+            p2csnTFF = fx{find([fx{:,1}]' == p2itnTFF(i) ...
+                & strcmp(fx(:,2),index_cstype(1)),1),5} - p2ientroom;
+
+        end
+
+        %  index the probability of first fixation for next step
+
+        p2iPFF = fx(find([fx{:,1}]' == p2itnTFF(i) ...
+            & (strcmp(fx(:,2),index_cstype(2))|strcmp(fx(:,2),index_cstype(1))),1,'first'),[1,2]);
+
+        if contains(p2iPFF(:,2),{'cs+'}) == 1
+            test = 1;
+        else
+            test = 0;
+        end
+
+
+        evnmat {evn,1} = ix;
+        evnmat {evn,2} = p2itnTFF(i);
+        evnmat {evn,3} = cspi;
+        evnmat {evn,4} = cstrial{:};
+        evnmat {evn,5} = test;
+        evnmat {evn,6} = ['cs+'];
+        evnmat {evn,7} = p2cspTFF;
+        evnmat {evn,8} = ['cs-'];
+        evnmat {evn,9} = p2csnTFF;
+
+
+    end
+
+    % ------- save first fixation to personal file -------
+
+    s(ix).Avoid_fixation.timetoFixfixationr1 = evnmat;
+
+    %% --------- 5. total fixation duration ----------------------------------
+
+    % --------- note -----------------
+    % Aim： to idenftiy total fixation duration
+    % total fixation duration is calculated by summing up all timestamps of cs+
+    % and cs- seperately in the first room.
+    % In case there is no fixation recorded for one of the cs types in a trial,
+    % we identify the trial number associated with the duration of each cstype
+
+
+    % -------- Parameter ----------------
+
+
+    it = {};
+    iti = {};
+    p2tcsp = [];
+    p2tcsn = [];
+    p2r1tdcst = {};
+
+
+    % -------- total fixation duration ------
+
+    evn = 0;
+
+    for i = 1 : size(p2itnTFF,1)
+
+        cstrial  = savoid([savoid{:,2}] == p2itnTFF(i),4);
+        it = evmat2([evmat2{:,1}]' == p2itnTFF(i) ...
+            & strcmp(evmat2(:,2), index_cstype(2)),:); % ics(2) = cs+ 
+        iti = evmat2([evmat2{:,1}]' == p2itnTFF(i) ...
+            &  strcmp(evmat2(:,2), index_cstype(1)),:); %ics(1) = cs-
+
+        % sum up all segerements of duration associated with cs+
+
+        if isempty(it) == 1
+            p2tcsp = 0;
+
+        else
+            p2tcsp = sum([it{(strcmp(it(:,2),index_cstype(2))),4}]); % cs= positive
+
+        end
+
+        % sum up all segerements of duration associated with cs-
+        if isempty(iti) == 1
+            p2tcsn = 0;
+
+        else
+            p2tcsn = sum([iti{(strcmp(iti(:,2),index_cstype(1))),4}]); % cs = negative
+
+        end
+
+        evn = evn + 1;
+        p2r1tdcst {evn,1} = ix;
+        p2r1tdcst {evn,2} = cspi;
+        p2r1tdcst {evn,3} = cstrial{:};
+        p2r1tdcst {evn,4} = p2itnTFF(i);
+        p2r1tdcst {evn,5} = 'cs+';
+        p2r1tdcst {evn,6} = p2tcsp;
+        p2r1tdcst {evn,7} = 'cs-';
+        p2r1tdcst {evn,8} = p2tcsn;
+
+
+    end
+
+
+    % -----------  save total fixation duration in to a personal file   ---------
+
+
+    s(ix).Avoid_fixation.totalfixationr1 = p2r1tdcst;
+
+
+
+end
+
+save 0620
+
+
+% write in a table 
+
+%% remove participants and trials
+
+
+  index_trial = setdiff([remove_trial{:,1}],[remove_participants{1,:}]');
+
+  remove_trial = remove_trial(ismember([remove_trial{:,1}],index_trial(:)),:);
+
+  s([remove_participants{:}]) =[];
+
+
+
+  % avoidance: cs pupil dilation, time to first fixation, total fixation
+  % and probability and avoidance.
+
+evn1 = 0;
+evn2 = 0;
+
+list1 = {}; % all data of avoidance
+
+list2 = {}; % all data of Pavlov_fixation.timetoFixfixation
+for ix = 1:size(s,2)
+for i = 1:size(s(ix).Pavlov_fixation.timetoFixfixation,1)
+    evn1 = evn1+1;
+    list1(evn1,1: 5) = s(ix).Pavlov_fixation.timetoFixfixation(i,:);
+    list1(evn1,6) =  s(ix).Pavlov_fixation.timetoFixfixation(i,:);
+
+end
+end 
+
+
+
