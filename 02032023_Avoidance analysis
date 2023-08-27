@@ -1,0 +1,331 @@
+%% pre-processing behavior data 
+
+% --------- Notice  ------------
+
+
+% --------- Read data  ------------
+
+bfp = 'BF_DATA'; % index files matching all characters *
+sn  = dir(fullfile ('BF_DATA/BeyondFear_1*'));  %fullfile = build fullfile name from parts, sn =  subjects name
+eyd = dir(fullfile ('BF_DATA/BeyondFear_EYE_*'));% eyd = Eye data
+
+for i = 1: length(sn)
+
+    filnam = fullfile(bfp,sn(i).name);             % build fullfile name
+    edname = fullfile(bfp,eyd(i).name);            % edname = eye data name
+    aod.(['BF' num2str(i)]) = readtable(filnam);   % aod = avoidnce data 
+    eye.(['BFEYE' num2str(i)]) = readtable(edname);% eyd = eye-tracking data
+
+end
+
+
+
+%%  Extract RT 
+
+% ------------ note  ---------------
+
+% RT1 starts the time from 'open the door' to 'place book'
+% code Action start trial = 0 place book  = 0+n
+% create a loop for read table 
+
+% ------------ Parameter ---------------
+
+ a3 = {['Start Trial'],['Place book']}; % a3 = index of 'start trial' and 'place book' 
+
+% ------------ procedure ---------------
+
+for ii = 1:length(sn)
+    
+    % BFd1 = index BF avoidance data 
+    rti = aod.(strcat('BF',num2str(ii))); 
+    
+    % rti = index the step after "start the trial"
+    % index the the step because the step is defined as the really first step
+    % indicating that participants enter into the room 
+    
+    rts = find(strcmp(rti{:,6},a3(1))) + 1;
+
+    RT =  rti(rts,:); % Reaction time from the first step entering into the room 
+
+    RT.Properties.VariableNames{'TIMESTAMP'} = 'Timestamp_Enter'; % change the name in structure
+    RT.Properties.VariableNames{'CS_'} = 'CS_Positive';
+
+    % rtf = time stamp of finishing the decision (the step before the place the book) . 
+    % index rtf because the step is defined as the really last step
+    % indicating that participants finish deciding where they
+    % want to put the book away. 
+    
+    rtf = (find(strcmp(rti{:,6},a3(2))))-1;  
+    
+    RT.Timestamp_Finish = rti{rtf,1};
+
+    % rtd = total duration of avoidance
+   
+    RT.ReactionTime = RT.Timestamp_Finish - RT.Timestamp_Enter;
+    
+%     rtp = time stamp of place book indicates that the 
+%     rtp =(find(strcmp(a1{:,6},a3(2)))); 
+%     RT.Timestamp_Placebook = a1{rtp,1}
+% 
+%     % rtd = total duration of avoidance
+%     RT.ReactionTime = RT.Timestamp_Placebook - RT.Timestamp_Enter;
+
+    
+    %CS CONDITION
+   
+    RT.CS = rti.CS(rtf);
+   
+    %seperate files
+    RTp1f = find(strcmp(RT{:,2},'phase1'));
+    RTp1 =  RT(RTp1f,:);
+    RTpp1.(['BF' num2str(ii)]) = RTp1;
+    RTp2f = find(strcmp(RT{:,2},'phase2'));
+    RTp2 =  RT(RTp2f,:);
+    RTpp2.(['BF' num2str(ii)]) = RTp2;
+    RTp3f = find(strcmp(RT{:,2},'phase3'));
+    RTp3 =  RT(RTp3f,:);
+    RTpp3.(['BF' num2str(ii)]) = RTp3;
+
+end
+
+% < split the RT by phase >
+
+% for i = 1: size(sn,1)
+% 
+%  RTp1.(['BF' num2str(i)]) = RTpp1.(['BF' num2str(i)])(:,[2,3,4,14]);
+%  RTp2.(['BF' num2str(i)]) = RTpp2.(['BF' num2str(i)])(:,[2,3,4,14]);
+%  RTp3.(['BF' num2str(i)]) = RTpp3.(['BF' num2str(i)])(:,[2,3,4,14]);
+% 
+% end 
+% 
+
+
+
+
+
+%% code avodiance behavior 
+% ------------ note  ---------------
+% avoidance is coded as 1 = yes, 0 = no for each trial 
+
+%The index steps in a trial are coded such that a step associated with the
+%CS+ is represented by -3, and a step associated with the CS- is
+%represented by 1. This coding scheme helps to prevent miscalculations of
+%extra steps that may occur due to mistakes, such as participants moving
+%beyond the VR setting area, and is used to obtain an accurate count of the
+%number of trials with switching. In order to finish a trial, an odd number
+%of steps (>= 5) is always generated. We dummy code CS+ as -3 and CS- as 1,
+%and then sum the dummy-coded steps in a trial. If a number is >= -15 or is
+%a negative even number which is <=15, or if a number is >= 5 and is a
+%positive even number, it indicates the presence of switching in the trial.
+
+
+% we identify the avoidance by finding if a room contains 'ROOM 1' and ROOM 2'
+%  sum(contains(room,a20),"all")>1  = if a trial return two logic 1, then the participants avoid in this trial. 
+%  contains(room,a20) = find values in room has find in a20 
+
+
+% ------------ parameters ---------------
+
+a4 = {['phase2'],['phase3']};
+a5 = {['none']}; % whether get shock or not
+tn = unique(aod.BF1.TRIAL); % trial number
+a10 = [];  % dummy code of steps
+avdi = []; % Table avoidance
+cspi = {}; % index the CS+ (bending/streching) used for a participant
+a16 = {};  % a16 = cs type display in first room 
+tcs = [];  % Table CS positive
+
+% ------------ procedure ---------------
+
+% < extract movement associated with CS+>
+
+for iiii = 1:size(sn,1)
+    cspi(iiii,1) = aod.(strcat('BF',num2str(iiii))){1,4};
+end 
+
+% <extract data from phase 2 and phase 3>
+
+for ii = 1:size(sn,1)
+
+    avoid = aod.(strcat('BF',num2str(ii)));
+
+    % adp2 = index a4(1) phase2 
+    adp2.(strcat('BF',num2str(ii))) = avoid(strcmp(avoid{:,2},a4(1)),:);
+
+    % adp3 = index a4(2) phase3 
+    adp3.(strcat('BF',num2str(ii)))= avoid(strcmp(avoid{:,2},a4(2)),:);
+
+end 
+
+% < code a step associated with CS+ = -3 and CS- =1;>
+
+for  iii = 1: size(sn)
+    a13 = adp2.(strcat('BF',num2str(iii)));
+    r = 0;
+    
+    a13.Avoidindex = zeros(size(a13,1),1);
+   
+    for  i = 1:size(a13,1)
+
+        r = r+1;
+
+        if strcmp(a13{i,9},cspi{iii,1}) == 1
+
+            a12 = -3;
+
+        elseif strcmp(a13{i,9},a5) == 1
+
+            a12 = 0;
+
+        else
+
+            a12 = 1;
+
+        end
+       
+        a13.Avoidindex(r,1) = a12;
+        adp2.(strcat('BF',num2str(iii))) = a13;
+    end
+               for ii = 1:size(tn,1)
+                   a20 = [a13{[a13{:,"TRIAL"}]'== ii,'ROOM'}];                 
+                   a21(ii,iii)  = sum(contains(room,a20),"all")>1;
+           end
+           advi = a21(:)
+       end 
+   end 
+  % ev = 0;
+    %for ii = 1:size(tn,1)
+       % ev = ev+1;
+       % a8 = sum([a13{[a13{:,"TRIAL"}]'== ii, "Avoidindex"}]');
+       
+       % a10(ev,iii) = sum([a13{[a13{:,"TRIAL"}]'== ii, "Avoidindex"}]');
+        
+       % if a8 > - 15 & a8 < 5  
+            avdi(ev,iii) = 1;
+        
+        % elseif a8 == -16
+
+           % avdi(ev,iii) = 1;
+       % else 
+          %  avdi(ev,iii) = 0;
+        %end
+   % end
+
+   % clear a13 
+end
+
+%%
+% < index the the CS stimuli used in the first room in a trial >
+
+for i = 1:size(sn,1)
+    ev = 0;   
+    a14 = adp2.(strcat('BF',num2str(i)));
+
+    for ii  = 1:size(tn,1)
+
+        a15 = a14(a14{:,3} == ii,9); % a15 = extract CS type showed in trials
+
+        % find the first dummy code used after start trial.
+        % -3 = CS +
+        %  1 = CS -
+       
+        ev = ev+1;
+        % find the CS type (a16) in the first room;
+        % identifying the CS is to find the first CS after 'none'
+        % presenting: start a trial.
+        % Once the top two are "none", then index the third value 
+        % final check data: find if there is 'none' saved in data
+        if strcmp(a15{1,1},a5) == 1 & strcmp(a15{2,1},a5) ~= 1
+
+            a16(ev,i) = a15{2,1}; 
+
+        elseif strcmp(a15{1,1},a5) == 1 & strcmp(a15{2,1},a5) == 1
+
+            a16(ev,i) = a15{3,1};
+
+        end
+
+        if strcmp(a16{ii,1},cspi{i,1}) == 1
+
+            tcs (ev,i) = 2; % CS+ 
+
+        else
+
+            tcs (ev,i) = 1; % CS- 
+
+        end
+
+    end
+end 
+
+% <check whether a wrong the first step is indexed in the firstroom> 
+a19 = strcmp(a16(:,:) ,'none');
+a19 = find(a19 == 1);
+
+
+
+%% build table for MXM
+
+% ------------ parameters ---------------
+
+pat = repmat([1:60],48,1);
+pat = pat(:);  % patient number
+trl = repmat(tn,1,60);
+trl = trl(:);  % trial number 
+avd = avdi(:); % index avoidance in total
+tcl = tcs(:);  % index CS type in total
+csl = []; % index location: upper = 2; lower = 1; 
+
+for i = 1:size(sn,1)
+
+    if strcmp(cspi(i,1),'bending') == 1
+        csl(i) = 1;
+    else
+        csl(i) = 2;
+    end
+
+end
+
+csl = repmat(csl,48,1);
+csl = csl(:);
+
+avov = {['Patients'],['Trials'],['Avoid'],['CStype'],['Location']};
+avot = table(pat,trl,avd,tcl,csl,VariableNames=avov);
+writetable(avot,'Phase_avoidance.csv')
+
+
+
+%% MXM 
+
+clc
+
+% < logistic model > 
+
+disp ('model 1: logistic model')
+
+avm= fitglme(avot,'Avoid~ CStype + Location + (1 + CStype｜Patients）', ...
+    'Distribution','Binomial','Link','logit','FitMethod','Laplace', ...
+    'DummyVarCoding','effects');
+
+disp(avm)
+%%
+% < mixed model with cluster levels >
+
+disp('model 2 : mixed model with fixed effects (CSype and Location) and random effects (patients) ')
+
+avm2= fitglme(avot,'Avoid~ CStype + Location + (1|Trials) + (1|Patients)', ...
+    'Distribution','Binomial','Link','logit','FitMethod','Laplace', ...
+    'DummyVarCoding','effects');
+
+disp(avm2)
+
+% < mixed model - random effect explained by the correlation between trials and patients  >
+
+%%
+disp('model 4 : mixed model with fixed effects and random effects (cov[Trials and patients]) ')
+
+avm4= fitglme(avot,'Avoid~ -1+ CStype * Location  + (1|Patients)', ...
+    'Distribution','Binomial','Link','logit','FitMethod','Laplace', ...
+    'DummyVarCoding','effects'); % random effect is from the correlation between Trials and individual difference 
+
+disp(avm4) 

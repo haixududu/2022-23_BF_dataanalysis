@@ -1,0 +1,352 @@
+%% phase 2 eye-tracking 
+
+% % --------- the first fixation duration = 0.01 -------
+
+% if we have a first fixation duration after avoidance.
+
+ for g = 1:length(sn)
+     f1  = {''};
+     f28 = {};
+     f3   = [];
+     f4 = {}; % pct = sct
+     f5 = {}; % CS type
+     f6 = [];
+     f7 = []; % location  {['CS+'],['CS-']};
+     f17 = [];
+     g6 = 0;
+     f8 = 0;
+
+    f9 = P2.(strcat('BFEYE',num2str(g)));
+    f10  = [g]; % index participants
+
+    for g1 = 1:size(f9,1)
+         f11 = f9 {g1,3};
+         f12 = f9 {g1,4};
+         f13 = f9 {g1,8}; % first fixation location on CS+ 
+         f14 = f9 {g1,9}; % CStype 
+         f15 = f9 {g1,10};% location
+         f16 = cell2num(f9{g1,7}); % room 
+        if isempty(f1) | ~strcmp(f12{1},f1{1})
+            
+            f8 = f8+1;
+         
+            t1 = f9 {g1,1};
+            f28 {f8, 1}  = f3;
+            f28 {f8, 2}  = f6;
+            f28 {f8, 3}  = f1{1};
+            f28 {f8, 4}  = [g6, t1]; % real time
+            f28 {f8, 5}  = t1-g6;   %  duration
+            f28 {f8, 6}  = f17;
+            f28 {f8, 7}  = f4; % pct = CStype (1 = CS- vs. 2 = CS+ ) 
+            f28 {f8, 8}  = f5;
+            f28 {f8, 9}  = f7; % plo = location of AOIs ( 0 = out of AOIs; 1 = lower;2 = upper)
+            g6  = t1;
+            f1 = f12;
+            f6 = f11;
+            f4 = f13;
+            f5 = f14; 
+            f7 = f15;
+            f3 = f10;  
+            f17 = f16;
+
+        end 
+    end
+     p2ed{g} = f28(2:end,:); % eye-tracking data in phase 2
+ end 
+
+ % --------- save the FF for each trial and per person -------
+
+ for g10 = 1: length(sn)
+    f19 = p2ed{g10}; 
+    f20 = f19([f19{:,5}]' > 0.1 & (strcmp(f19(:,3), mov(1)) | strcmp(f19(:,3), mov(2))),:);
+    f21 = find (cell2mat(f20(:,1)) == [g10]); % f21 = participants number index
+    f22 = f20(f21,:); % f22 = index the data based on participants
+    f23 = unique(cell2mat(f22(:,2))); % unique number of trials
+    f24 = cell(length(f23), size(f19,2)); % create a empty cell array for results
+    for g3 = 1:length(f23)
+        index = find(cell2mat(f22(:,2)) == f23(g3));
+        f24(g3,:) = f22(index(1),:);
+    end
+   p2_ff{g10} = f24; % p2_ff = extract first fixation for each participants in phase 2. 
+end
+
+
+% extract firstfixtion, first fixation duration, cstype, location for MEM analysis 
+
+f25 = [];
+f26 = [];
+f27 = [];
+f28 = [];
+f29 = [];
+for g10 = 1:size(sn,1)
+   
+    f25 (:,g10) = [p2_ff{g10}{:,5}]'; % room number 
+    f26 (:,g10) = [p2_ff{g10}{:,6}]';
+    f27 (:,g10) = [p2_ff{g10}{:,7}]';
+    f28 (:,g10) = [p2_ff{g10}{:,8}]';
+    f29 (:,g10) = [p2_ff{g10}{:,9}]';
+
+end 
+
+p2frn = f25 (:); % p2frn = fixation located on the room (room 1 and room 2) 
+p2fxl = f26 (:); % p2fxl = first fixation location
+p2fxd = f27 (:); % p2fxd = first fixation duration
+p2fcs = f28 (:); % p2fcs = cstype 
+p2fld = f29 (:); % p2fld = location (upper and lower) 
+ 
+
+% --------- save the total fixation duration for each trial and per person -------
+
+for g3 = 1:size(sn,1)
+
+g4 = 0;
+g5 = 0;
+g6 = 0;
+f30 = { };
+f31 = {''};
+f32 = { };
+f33 = {};
+f34 = {};
+f35 = {};
+f36 = {};
+f37 = [g3];
+
+    f38 = sortrows(evmat1{g3},[1,2,3],'descend');
+    f39 = f38(strcmp(f38(:,3) , mov(1)) | strcmp(f38(:,3),mov(2)),:); % data only for stretching and bending
+    for g7 = 1:16
+        for g8 = 1:size(mov,2)
+            g4 = g4 +1;
+            f40 = sum([f39{[f39{:,2}]'== g7 & strcmp(f39(:,3) , mov(g8)), 5}]',1);
+
+            if isempty(f40) == 1
+                f40 = 0;
+            end
+
+            f30(g4,:) = {f40};
+            f45 = f30(end:-1:1);
+        end
+    end
+   
+    for g9 = 1: size(f38,1)
+
+
+         f41 = f38 {g9,2}; % trial
+         f42 = f38 (g9,3); % bending and stretching
+         f43 = f38 {g9,7}; % cstype
+         f44 = f38 {g9,8}; % location
+
+        if  isempty(f31) | ~ strcmp(f42{1}, f31{1})
+            
+            g5 = g5+1;
+
+%             t1 = data{c3,5}  % duration of event
+           
+            f32 {g5,1} = f33;
+            f32 {g5,2} = f34;
+            f32 {g5,3} = f31{1};
+%             data3 {r1,6} = t1-t0;
+            f32 {g5,4} = f35;
+            f32 {g5,5} = f36;
+
+%             t0  = t1;
+            f31 = f42;
+            f33 = f37;
+            f34 = f41;
+            f35 = f43;
+            f36 = f44;
+
+        end
+
+    end
+
+    p2tgd{g3} = f45([f45{:}] >0) % tfd = total fixation duration per person/trial (16:1)
+    p2tgi{g3} = f32(strcmp(f32(:,3) , mov(1))| strcmp(f32(:,3) , mov(2)),:) % tgi = total gaze duration index (16:1)
+
+end
+
+ % extract data total fixation duration, cstype, locaton 
+
+for g10 = 1:size(sn,2)
+    f45 (:,g10) = [tgd{g10}{:}]';
+    f46 (:,g10) = [tgi{g10}{:,4}]';
+    f47 (:,g10) = [tgi{g10}{:,5}]';
+end 
+
+p2tfd = f45 (:); % tfd = total fixation duration (16:1)
+p2tcs = f46 (:); % tcs = cstype   (2:1)
+p2tlo = f47 (:); % tlo = location (2:1)
+
+for g11 = 1:size(sn,1)
+    for g12 = 1:numel(ptfd{g11})
+        f50 (g12,g11) = tgd{b}{g12} % if the amount of rows does't match, the empty place is filled out by 0
+        f51 (g12,g11) = tgi{b}{g12,4}
+        f52 (g12,g11) = tgi{b}{g12,5}
+    end
+end
+
+
+p2tfd = f50 (:); % tfd = total fixation duration (16:1)
+p2tfd = p2tfd([p2tfd >0]); % remove data = 0
+p2tcs = f51 (:); % tcs = cstype   (2:1)
+p2tcs = p2tcs([p2tcs >0]);
+p2tlo = f52 (:); % tlo = location (2:1)
+p2tlo = p2tlo([p2tlo >0]);
+
+
+%% mixed-effect probability of first fixation (PFF)
+
+disp('they are coming:mixed-effect probability of first fixation——p2:)');
+
+% --------- Note -------
+
+% fomula1: y = fixed effect (intercep,
+% X,..,Xn)+(random1|group1)+...+(randomN｜groupN)
+% function: fitglm
+
+ % p2fxl = first fixation location (1:16)
+ % p2fcs = cstype (1:2)
+ % p2fld = location (upper and lower) (1:2)
+
+
+% --------- mixed-effect modeling (mlgm) -------
+
+
+
+
+% check data 
+ 
+histogram(fxl)
+
+% create table 
+               
+vam = {['FirstFixation'],['CStype'],['Location'],};
+mlgm = table(fxl,fcs,fld,'VariableNames',vam);
+writetable(mlgm,'Phase2_Probablity of first fixation.csv');
+
+
+
+%  fomula 
+
+pff = fitglme(mlgm,'FirstFixation ~ CStype + (1|Location)', ...
+    'Distribution','Binomial','Link','logit','FitMethod','Laplace', ...
+    'DummyVarCoding','effects');
+
+disp(pff) 
+
+% plot data 
+
+% x = [mlm.CStype];
+% y = [mlm.FirstFixation];
+% 
+% [ypred,ycl] = predict(pff,mlm); % Fit the mixed effects logistic regression model
+% scatter(x,y,ypred);
+% 
+% 
+% hold on;
+% 
+% 
+% plot(x,y,ycl(:,1),'--','Color','red');% 95% CI
+% plot(x,y,ycl(:,2),'--','Color','red');
+% 
+% xlabel ('CSTYPE');
+% ylabel ('PROBABILITY')
+%  
+% ylabel ('PROBABILITY')
+
+
+%% Mixed-effect linear regression of the first fixation duration
+
+disp('Next:):Mixed-effect linear regression of the first fixation duration-')
+
+% -------- notice -----------
+
+% tfd fixation duration
+% FFD first fixation duration = 0.1
+% check skewness
+% time to first fixation CS+ and CS-: This variable is quantified as
+% the time from stimuli onset until the first fixation to either the emotion or
+% neutral face. Much like biases in the probability of first fixations,
+% prior research also generates clear predictions concerning biases in
+% latency of this initial fixation for angry relative to neutral faces(Shechner et al., 2013, p. 16)
+
+ % fxd = first fixation duration (1:16)
+ % fcs = cstype (1:2)
+ % fld = location (upper and lower) (1:2)
+
+% -----   mixed-effect modeling (mlm)---- 
+
+% check data & log(data)
+
+
+histogram(fxd);
+isoutlier(fxd);
+
+m1 = log(fxd);
+
+histogram(m1);
+
+
+% create a table 
+
+m2 = {['FFduration'],['CStype'],['Location'],}; % variable name for first fixation duration table
+m3 = table(m1,fcs,fld,'VariableNames',m2);  % m3 = table with ffd (1:16),cstype, location (1:2)
+writetable(m3,'Phase2_first fixation duration.csv');
+% fomula
+
+ffd = fitglme(m3,'FFduration ~ CStype + (1|Location)', ...
+    'Distribution','normal','FitMethod','Laplace', ... 
+    'DummyVarCoding','effects');
+
+disp(ffd)
+
+% plot data 
+
+
+
+%% Mixed-effect linear regression of total fixation duration 
+
+disp('The LAST :): Mixed-effect linear regression of total fixation duration -')
+
+% -----  notice ---- 
+% two types of total gaze duration
+% total gaze duration per trial = 
+% average total gaze duration = /16 trial
+
+% tfd = total fixation duration (16:1)
+% tcs = cstype   (2:1)
+% tlo = location (2:1)
+
+% -----   mixed-effect modeling (mlm)---- 
+
+%   check data 
+
+histogram(tfd);
+
+m4 = log(tfd);
+
+histogram(m4);
+
+% create a table
+
+m5 = {['TFduration'],['CStype'],['Location'],}; % m5 = variable name for first fixation duration table
+m6 = table(m4,tcs,tlo,'VariableNames',m5); % m6 = table with total fixation duration (16:1),cstype, location (2;1)
+writetable(m6,'Phase2_total fixation duration.csv');
+
+% mixed-effect modeling 
+
+tgd = fitglme(m6,'TFduration ~ CStype + (1|Location)', ...
+    'Distribution','normal','FitMethod','Laplace', ...
+    'DummyVarCoding','effects');
+
+disp(tgd)
+
+% plot data 
+
+
+
+disp('Well done! Cross-fingers for Phase3')
+
+
+
+
+

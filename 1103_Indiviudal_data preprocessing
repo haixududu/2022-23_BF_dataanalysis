@@ -1,0 +1,846 @@
+
+clear all
+clc
+
+tic
+
+%% data preprocessing for one subjects
+
+% ------- note -------
+% This script aims to build an structure includes personal traits,
+% data for manipulation checking and data for main data analysis for each
+% participants
+
+% data structure (take the first participant as an example) 
+
+    % sub1.cspositive_location = 'stretching'
+    
+    % sub1.personaltriats. 
+    
+    % sub1.manipulation_fixation.firstfixation & totalfixation_csnegative & totalfixation_cspositive  
+    
+    % sub1.mainanalysis_fixation. firstfixationroom1  & firstfixationroom2 &
+    % totalfirxationroom1 & total fixationroom2
+    
+    % sub1.mainanalysis_behavior.avoidance
+
+%%% Please read the 'readme' file for instructions on how to execute the script for each step.
+
+
+%% --------- Step 1: read data and unify the name of AOIs for further analysis  ------------
+
+% Assigns the path to the directory containing the data to a
+% variable named 'bfp'
+bfp = 'BF_DATA';
+
+% Obtain a list of files in the
+% directory whose filenames start with 'BeyondFear_1', and assigns the
+% resulting structure array to a variable named 'avo', which save the data in a structure.
+avo = dir(fullfile('BF_DATA/BeyondFear_1*'));
+
+% obtain a list of files in the
+% directory whose filenames start with 'BeyondFear_EYE_', and assigns the
+% resulting structure array to a variable named 'eyd'.
+eyd = dir(fullfile('BF_DATA/BeyondFear_EYE_*'));
+
+
+
+for i = 1: length(1)
+
+    % Uses the "fullfile" function to create a filename by combining the
+    % directory path "bfp" and the "name" field of avoid 
+
+    filnam = fullfile(bfp,avo(i).name);
+    fav = readtable(filnam);
+
+    % for further analysis, the data is save as cell
+    sub_avo = table2cell(fav);
+
+    % save eye-tracking data into cell
+    edname = fullfile(bfp,eyd(i).name);
+    eyt = readtable(edname);
+    sub_eye = table2cell(eyt);
+
+end
+
+% clear filnam edname bfp avo fav 
+% clear  eyd eyt
+
+
+%% --------- data preprocessing -------------
+
+%%% < descriptive data>
+
+% Subject number
+% sn = 1;
+
+% Phase number
+pn = unique(sub_avo(:, 2));
+
+% Trial number
+tn = unique([sub_avo{:, 3}]');
+
+% if a participant doesn't have 48 trials reported it. 
+if size(tn,1) ~= 48
+
+    disp(size(tn,1) & sn)
+end
+
+% < split files based on phases >
+
+for i = 1: size(pn,1)
+
+    sub1_behavior_phase2 = sub_avo(strcmp(sub_avo(:,2),pn{2}),:);
+    sub1_behavior_phase3 = sub_avo(strcmp(sub_avo(:,2),pn{3}),:);
+
+end
+%% ----------- parameter for behavior data ---------------
+
+%%% < identify avoidance >
+
+% room type
+rm = {['Room 1'],['Room 2']};
+
+% identify type of rooms based on trials
+itr = {};
+
+% identify avoidance
+iav = [];
+
+%%% < identify CStype >
+
+% index step in the hall
+inv = ['none'];
+
+% cstype used in rooms
+cst = {};
+
+% index movmemnt used in the first room
+imov = {};
+
+% index number of room used in the first room
+iroomav = {};
+
+% index CS positive used in the first room
+cspi = {};
+
+% save CStype used in first room
+
+fcs = {};
+
+% index cs type
+ics = {['cs-'],['cs+']};
+
+% save all data in a structure of avoiance 
+
+savoid = {}; 
+
+% phase number 
+
+phase = {['phase1'];['phase2'];['phase3']};
+
+
+%% ---------  code avoidance/no-avoidance ------------
+
+% if the contains return logic number '1' which means there are two types of
+% rooms within this trial. Then sum the logic number, if the result >1,
+% that indicates avoidance.
+
+for i = 1:size(tn,1)
+
+    itr = sub1_behavior_phase2([sub1_behavior_phase2{:,3}] == i,7); % coloum 3 = Trial, coloum 7 = ROOM
+    iavi = sum(contains(rm,itr),"all"); %%%%%% avoiance index %%%%%%%
+    
+    if iavi == 1
+        iav(i,1) = 0;
+    else
+        iav(i,1) = 1;
+
+    end
+end
+
+%% < identify CS type used in first room >
+
+% extact the movement and the room number used in the first room
+
+for i  = 1:size(tn,1)
+
+    cst = sub1_behavior_phase2([sub1_behavior_phase2{:,3}] == i,9);     % coloum 9 = CStype
+    roombeh = sub1_behavior_phase2([sub1_behavior_phase2{:,3}] == i,7); % coloum 7 = ROOM
+
+    if strcmp(cst{1,1},inv) == 1 & strcmp(cst{2,1},inv) ~= 1
+
+        imov (i,1) = cst (2,1);
+        iroomav (i,1) = roombeh (2,1);
+
+    elseif strcmp(cst{1,1},inv) == 1 & strcmp(cst{2,1}, inv) == 1
+
+        imov (i,1) = cst (3,1);
+        iroomav (i,1) = roombeh (3,1);
+
+
+    end
+
+end
+
+ckcsi = contains(inv,imov); %%% check whether there is wrong index (e.g., 'none')
+
+if ckcsi ~= 0
+
+    disp(cksci,sn);
+end
+
+% if the movement recored in the first room is as same as 'CS
+% positive', then it is identified as CS+. Otherwise, it is coded as CS- .
+
+cspi = sub1_behavior_phase2{1,4}; % cspositive and location index 
+
+for i  = 1:size(imov,1)
+
+    if strcmp(imov{i},cspi) == 1
+
+        fcs (i,1) = {['cs+']};
+    else
+
+        fcs (i,1) = {['cs-']};
+
+    end
+
+end
+%%
+
+%%% discripte the hall to identify people walking patten
+for i = 1:size(tn,1)
+
+savoid {i,1} = tn(i);
+savoid {i,2} = iav(i);
+savoid {i,3} = fcs{i};
+
+end 
+
+disp(savoid)
+
+%% save behavior data
+
+%%%%%% < structure> %%%%%
+
+s1.mainanalysis_behavior.avoidance = savoid;
+
+% index the location of CS positive
+s1.csp_location = cspi;
+
+clear fcs ckcsi cst fcs  inv sub_avo 
+% clear csi iav itr 
+
+%% ---- parameter for Eye data -----
+
+%%% < data preprocessing>
+
+% unify the name of AOIs
+
+upaoi = {['Bookcase Top Row'],['Empty Spot Top']};
+loaoi = {['Bookcase Bottom Row'],['Empty Spot Bottom']};
+
+% CS type
+mov = {['bending'],['stretching']};
+
+% create a new variable room
+room = [];
+
+% index the 1st and 2nd room 
+
+irme = {['1st room'],['2nd room']}';
+
+% eye-blinking data.mat
+
+ppd = [];
+
+% index proportion of invalid data
+ivd = [];
+
+% index the subject whos the proporation of invalid data is more than 75%
+% ivdx, ivdy = coordinate
+
+% eye=-blinking data associated with movements
+emd = [];
+
+% propostion of invalid data of CS type
+ivm = [];
+
+
+%%% < eye-tracking data -phase 1 >
+
+% save the variable name
+evl  = {''};
+% save number of trials
+trl = [];
+% set the starting time from 0.
+t0   = 0;
+% account the times of interval
+evn  = 0;
+
+%%%%%% save data in cells %%%%%
+evmat = {};
+
+% save the trial number for first fixation
+fftrialnam = [];
+
+% save the trial number for total fixation of cs-
+itcn = {};
+
+% save the trial number for total fixation of cs+
+itcp = {};
+
+% fixation
+fx = {};
+
+%%%%% index first fixation for each trial %%%%%
+iffd = {};
+
+% index of total fixation duration for cs-
+iti = {};
+
+% index of total fixation duration for cs+
+it = {};
+
+%%%%% total duration for cs- %%%%%
+tdcsn = {};
+%%%%% total duration for cs- %%%%%
+tdcsp = {};
+
+%% --------- data preprocessing -------------
+
+%%% < decriprive data>
+
+% unify AOIs name
+foc = sub_eye(:,4); % extract FOCU
+
+
+%% create a variable room
+
+foc (contains(foc,'none')) = {'Room 0'}; % add digit for further create variable : ROOM
+pat = lettersPattern(4)+" "+digitsPattern;
+room = extract(foc,pat);
+
+
+
+%% assign aoi associated with movemnet
+
+foc (contains(foc,loaoi)) = mov(1);
+foc (contains(foc,upaoi)) = mov(2);
+
+cs = foc;
+
+if contains(mov(1),cspi) == 1
+    foc(contains(foc,mov(1))) = {'cs+'};
+    foc(contains(foc,mov(2))) = {'cs-'};
+
+elseif contains(mov(1),cspi) ~= 1
+
+    foc(contains(foc,mov(1))) = {'cs-'};
+    foc(contains(foc,mov(2))) = {'cs+'};
+
+end
+
+
+
+% new sub1 eye-tracking data
+sub_eye(:,7) = foc;
+sub_eye(:,8) = room;
+sub_eye(:,4) = cs;
+
+
+%%%%%% check the proportion of invalid data
+
+ppd = cell2mat(sub_eye(:,[5,6]));
+
+ivd(1,:)= reshape([-1,-1;sum(ppd == -1,1);sum(ppd ==-1,1)/size(ppd,1)],[1,6]);
+
+% index the subject whos the proporation of invalid data is more than 75%
+
+[ivdx,ivdy] = find(ivd(:,[3,6]) >= 0.75);
+
+%%%%%% check the proportion of invalid eye blinking data assoicated with
+%%%%%% movement
+
+emd = cell2mat(sub_eye(contains(sub_eye(:,4),mov),[5,6]));
+
+ivm(1,:)= reshape([-1,-1;sum(ppd == -1,1);sum(ppd ==-1,1)/size(ppd,1)],[1,6]);
+
+[ivdmx,ivdmy] = find(ivm(:,[3,6]) >= 0.75);
+
+% split the phases
+
+for i = 1: size(pn,1)
+
+    sub1_eye_phase1 = sub_eye(strcmp(sub_eye(:,2),pn{1}),:);
+    sub1_eye_phase2 = sub_eye(strcmp(sub_eye(:,2),pn{2}),:);
+    sub1_eye_phase3 = sub_eye(strcmp(sub_eye(:,2),pn{3}),:);
+
+end
+
+%% plot data y phases and group 
+
+% descriptive eye-link data 
+% the mean of eye-blink data 
+% the standard diviation of eye-blink data 
+
+
+
+% plot data to describe the distribution of data
+ 
+ evn = 0; 
+loceye = {['left'],['right']};
+
+coloum = [5,6];
+
+% save subfigure in a figue
+fig = figure(1);
+for i = 1:2
+    for ii = 1:2
+    hg = sub_eye(strcmp(sub_eye(:,2),phase{i}) & contains(sub_eye(:,4),mov),coloum(ii));
+    
+    evn = evn+1;
+% t = tiledlayout('flow')
+subplot(2,2,evn)
+histogram([hg{:}]);
+title (strcat('phase', num2str(i),loceye(i)));
+% han=axes(fig,'visible','off'); 
+% xlabe (t,'pupil dilation (mm)')
+% ylable(t,'number')
+    end 
+end 
+
+file_name = strcat('Histogram of pupil dilation', '.png');
+frame = getframe(fig)
+imwrite (frame.cdata,file_name);
+%%
+% plot the data according to trial
+
+fig2 = figure(2)
+evn = 0;
+for i = 1:2
+    xtrial  = [sub_eye{strcmp(sub_eye(:,2),phase{i}) & contains(sub_eye(:,4),mov),3}]';
+    for ii = 1:2
+    hg = sub_eye(strcmp(sub_eye(:,2),phase{i}) & contains(sub_eye(:,4),mov),coloum(ii));
+    
+    evn = evn+1;
+
+subplot(2,2,evn)
+xlim = xtrial;
+ylim = [hg{:}]
+plot(xlim,ylim,'o')
+title (strcat('phase', num2str(i),loceye(i)));
+    end 
+end 
+
+file_name = strcat('pupildialation timeseries', '.png');
+frame = getframe(fig2)
+imwrite (frame.cdata,file_name);
+
+
+% clear sub_eye  room ppd ivd ivdx ivdy ivdmx ivdmy  upaoi loaoi emd cs
+% clear foc ivm
+
+%% < eye-blinking >
+
+
+
+
+
+
+
+
+
+%% identify the first and second room
+
+
+roomreplace = {};
+evn = 0;
+iroom = {}; 
+
+for i = 1:size(tn,1)
+
+    iroomeye = sub1_eye_phase2([sub1_eye_phase2{:,3}] == i, 8); 
+    
+    for ia = 1: size(iroomeye,1)
+        
+        if contains(iroomeye(ia),{'Room 0'}) == 1 % Room 0 = do not enter into a room
+            iroomeye(ia,1) = {'Room 0'};
+        elseif contains(iroomeye(ia),iroomav(i)) == 1 
+            iroomeye(ia,1) = irme(1);
+        else 
+            iroomeye(ia,1) = irme(2);
+
+        end
+    end 
+     % save new room into cells
+    iroom(i,1) = {iroomeye};
+
+    for ia = 1: size(iroomeye,1)
+        evn = evn+1;
+        roomreplace(evn,1) = iroomeye(ia);
+    end 
+
+end 
+
+sub1_eye_phase2(:,8) = roomreplace; 
+
+
+
+%%  --------- idenfity the fixation and duration for phase1  -------------
+
+%%% < index fixation >
+evn = 0;
+
+for i = 1:size (sub1_eye_phase1,1)
+
+    % index trial number
+    itrial1 = sub1_eye_phase1{i,3};
+
+    % index fixation on cstype
+    ifcs1 = sub1_eye_phase1 (i,7);
+
+    if isempty (evl) | ~strcmp (ifcs1(1),evl(1))
+
+        evn = evn+1;
+
+        t1 =  sub1_eye_phase1 {i,1};
+
+        evmat {evn, 1}  = trl;      % trial number
+        evmat {evn, 2}  = evl{1};   % cs type
+        evmat {evn, 3}  = [t0, t1]; % duration with starting and ending time
+        evmat {evn, 4}  = t1-t0;    % duration of fixation
+
+        t0  = t1;
+        evl = ifcs1;
+        trl = itrial1;
+    end
+end
+
+%%%%% fixation and duration for each trial %%%%%
+evmat = evmat(2:end,:);
+
+
+%%% <identify the first fixation and the duration within a trial>
+
+% filter the first fixation > 0.1s on cs type for each trial
+
+fx = evmat([evmat{:,4}]' > 0.1 & (strcmp(evmat(:,2), ics(1)) | strcmp(evmat(:,2), ics(2))),:);
+
+% incase there is no first fixation displayed in a trial,
+%the number of trials is confirmed
+
+fftrialnam = unique([fx{:,1}]');
+
+for i = 1:size(fftrialnam,1)
+    ifx = fx([fx{:,1}] == i,:);
+    iffd(i,:) = ifx (1,:);
+end
+
+s1.p1_fixation.firstfixation = iffd;
+
+clear itrial1 ifcs1 evl trl t0 t1 fftrialnam cspi
+
+%% < identify total fixation duration >
+
+
+% confirm the trial number for cs-
+
+itcn = evmat((strcmp(evmat(:,2), ics(1))),:); % ics(1) = cs-
+itcnt = unique([itcn{:,1}]');
+
+% confirm the trial number for cs+
+
+itcp = evmat((strcmp(evmat(:,2), ics(2))),:); % ics(2) = cs+
+itcpt = unique([itcp{:,1}]');
+
+% total fixation duration for cs-
+
+evn = 0;
+
+for i = 1:size(itcnt,1)
+    iti = evmat([evmat{:,1}]' == i & (strcmp(evmat(:,2), ics(1))),:); %ics(1) = cs-
+    tcsn = sum([iti{(strcmp(iti(:,2),ics(1))),4}]); % csn = negative
+
+    evn = evn + 1;
+
+    tdcsn {evn,1} = itcnt(i);
+    tdcsn {evn,2} = tcsn;
+
+
+end
+
+
+s1.p1_fixation.totalfixation_csnegative = tdcsn;
+
+% total fixation duration for cs+
+
+evn = 0;
+
+for i = 1:size(itcpt,1)
+    it = evmat([evmat{:,1}]' == i & (strcmp(evmat(:,2), ics(2))),:); % ics(2) = cs+
+    tcsp = sum([it{(strcmp(it(:,2),ics(2))),4}]); % cs= positive
+
+    evn = evn + 1;
+
+    tdcsp {evn,1} = itcpt(i);
+    tdcsp {evn,2} = tcsp;
+
+
+end
+
+s1.p1_fixation.totalfixation_cspositive = tdcsp;
+
+% clear tdcsp iti it tdcsn tcsn itcp itcpt itcp itcn itcnt
+
+%% --------- idenfity the fixation and duration for phase2  -------------
+
+% --------------parameter-----------
+
+%%% < eye-tracking data -phase 2 >
+
+% itrial2 = index the trial number 
+% ifcs2 = cstype 
+% ifrm  = value saved in a room 
+
+% save the variable name
+evl2  = {''};
+
+% save number of trials
+trl2 = [];
+
+% set the starting time from 0.
+t0   = 0;
+
+% account the times of interval
+evn  = 0;
+
+%%%%%% save data in cells %%%%%
+evmat2 = {};
+
+% save the trial number for first fixation
+fftrialnam2 = [];
+
+% index room 
+rnn = []; 
+
+% save the trial number for total fixation of cs-
+itcn2 = {};
+
+% save the trial number for total fixation of cs+
+itcp2 = {};
+
+% fixation
+fx2 = {};
+
+
+%%%%% index first fixation for each trial %%%%%
+iffd2 = {};
+
+
+
+
+% -------------- procedure -----------
+
+%%% < identify the first fixation happend in which room >
+
+for i = 1:size (sub1_eye_phase2,1)
+
+    % index trial number
+    itrial2 = sub1_eye_phase2{i,3};
+
+    % index fixation on cstype
+    ifcs2 = sub1_eye_phase2 (i,7);
+
+    % index fixation on room
+
+    ifrm = sub1_eye_phase2 {i,8};
+
+% create a new cell with 
+
+    if isempty (evl2) | ~strcmp (ifcs2(1),evl2(1))
+
+        evn = evn+1;
+
+        t1 =  sub1_eye_phase2 {i,1};
+
+        evmat2 {evn, 1}  = trl2;      % trial number
+        evmat2 {evn, 2}  = evl2{1};   % cs type
+        evmat2 {evn, 3}  = [t0, t1]; % duration with starting and ending time
+        evmat2 {evn, 4}  = t1-t0;    % duration of fixation
+        evmat2 {evn,5}   = rnn;     % index the value in room 
+       
+        
+        
+        t0  = t1;
+        evl2 = ifcs2;
+        trl2 = itrial2;
+        rnn = ifrm;
+    end
+end
+
+    evmat2 = evmat2(2:end,:);
+
+  %% identify the fixation associated with room number
+
+% index the  fixation assoicate with CS+ and CS- 
+ if1p2 = evmat2((strcmp(evmat2(:,2), ics(1)) | strcmp(evmat2(:,2), ics(2))),[1,2,4,5]);
+
+ % index the room 1 contains fixation assoicate with CS+ and CS-
+ if2r1 = if1p2(strcmp(if1p2 (:,4), irme(1)),:);
+ 
+
+ % index the room 2 contains fixation assoicate with CS+ and CS-
+ if2r2 = if1p2(strcmp(if1p2(:,4), irme(2)),:);
+
+
+ % index the trial number of r1
+ ir1 = unique([if2r1{:,1}]');
+
+ % index the trial number of r2
+ ir2 = unique([if2r2{:,1}]');
+ 
+
+%%
+% identify the first fixation >0.1 in a room or fixation > 0.1, if there is
+% no fixation duration > 0.1, then we identify the largest one.
+
+% data structure for example: 
+% trial, cs type, Firstfixation, room 
+%  1   ,  cs+   ,   0.1   , 1st room 
+%  1   ,  cs -  ,   0.1   , 2nd room 
+%  2   ,  cs+   ,   0.07  , 1st room 
+%  2   ,  cs-   ,   0.1   , 2nd room 
+
+% ------ parameter ---------
+
+% index the room 1 contains fixation assoicate with CS+ and CS- for each
+% trial 
+irm1ft = {}; 
+
+% index the room 2 contains fixation assoicate with CS+ and CS- for each
+% trial
+irm2ft = {}; 
+
+% save the first fixation for each trial(1st room) %%%%%
+srm1x = {};
+% save the first fixation for each trial(2nd room) %%%%%
+srm2x = {};
+
+
+%%%%% save the first fixation for each trial in 'the first room" %%%%%
+ffixr1 = {};
+%%%%% save the first fixation for each trial in 'the second room" %%%%%
+ffixr2 = {};
+
+
+%%%%% save the first fixation for each trial in 'the first room" %%%%%
+
+for i = 1:size(ir1,1)
+
+    irm1ft = if2r1([if2r1{:,1}] == ir1(i),:);
+
+
+    if isempty(irm1ft([irm1ft{:,3}]'> 0.1)) ~= 1
+
+        srm1x = irm1ft(find([irm1ft{:,3}] > 0.1, 1,'first'),:);
+
+
+    else
+
+        srm1x = irm1ft(find([irm1ft{:,3}] == max([irm1ft{:,3}])),:)
+    end
+    
+     ffixr1(i,:) = srm1x;
+end
+
+%%%%% save the first fixation for each trial in 'the second room" %%%%%
+
+ for i = 1: size(ir2,1) 
+
+  irm2ft = if2r2([if2r2{:,1}] == ir2(i),:);
+
+    if isempty(irm2ft([irm2ft{:,3}]'> 0.1)) ~= 1 
+
+    srm2x = irm2ft(find([irm2ft{:,3}] > 0.1, 1,'first'),:);
+     
+        
+    else
+
+        srm2x = irm2ft(find([irm2ft{:,3}] == max([irm2ft{:,3}])),:);
+    end 
+        ffixr2(i,:) = srm2x;
+ end 
+
+
+ s1.p2_fixation.FFr1 = ffixr1;
+ s1.p2_fixation.FFr2 = ffixr2;
+
+
+ %% total fixation duration 
+
+ % ------ TTFD for r1 and cs type  ---------
+
+ % data fram (for example) 
+ % trial, cs type, Totalfix, room 
+%  1   ,  cs+   ,   0.1   , 1st room 
+%  1   ,  cs -  ,   0.1   , 2nd room 
+%  2   ,  cs+   ,   0.07  , 1st room 
+%  2   ,  cs-   ,   0.1   , 2nd room 
+
+
+
+%%
+evn = 0; 
+
+ for i = 1: size(ir1,1)
+
+  irm1tfcsn = sum([if2r1{[if2r1{:,1}]' == ir1(i) & strcmp(if2r1(:,2),ics(1)),3}])
+ 
+  irm1ftcsp = sum([if2r1{[if2r1{:,1}]' == ir1(i) & strcmp(if2r1(:,2),ics(2)),3}])
+   
+  evn = evn+1 
+
+  p2r1tdcs {evn,1} = ir1(i); 
+
+  p2r1tdcs {evn,2} = irm1tfcsn ;
+
+  p2r1tdcs {evn,3} = irm1ftcsp;
+
+  end 
+ 
+  disp(p2r1tdcs)
+ 
+   %% total fixation duration for room2 and cs
+
+evn = 0;
+
+
+ for i = 1: size(ir2,1)
+
+  irm2tfcsn = sum([if2r2{[if2r2{:,1}]' == ir2(i) & strcmp(if2r2(:,2),ics(1)),3}])
+ 
+  irm2ftcsp = sum([if2r2{[if2r2{:,1}]' == ir2(i) & strcmp(if2r2(:,2),ics(2)),3}])
+   
+  evn = evn+1 
+
+  p2r2tdcs {evn,1} = ir2(i); 
+
+  p2r2tdcs {evn,2} = irm2tfcsn ;
+
+  p2r2tdcs {evn,3} = irm2ftcsp;
+
+  end 
+ 
+  disp(p2r2tdcs)
+
+s1.p2_fixation.totalfixationr1 = p2r1tdcs;
+s1.p2_fixation.totalfixationr2 = p2r2tdcs;
+
+
+
+
+toc
+
+
